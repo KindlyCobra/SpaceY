@@ -1,4 +1,4 @@
-class Planet {
+export class Planet {
   address: number; // ~53-bit integer
 
   ownedBy?: number;
