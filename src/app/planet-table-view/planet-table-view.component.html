@@ -1,16 +1,16 @@
-<mat-table mat-table [dataSource]="planets">
+<mat-table [dataSource]="planets" matSort>
   <ng-container matColumnDef="address">
     <mat-header-cell *matHeaderCellDef>Address</mat-header-cell>
-    <mat-cell *matCellDef="let planet">{{planet.address}}</mat-cell>
+    <mat-cell *matCellDef="let planet">{{planet.address.toString(16)}}</mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="cost">
-    <mat-header-cell *matHeaderCellDef>Unit Cost</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="unitCost">Unit Cost</mat-header-cell>
     <mat-cell *matCellDef="let planet">{{planet.unitCost}}</mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="currentUnits">
-    <mat-header-cell *matHeaderCellDef>Current Units</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
     <mat-cell *matCellDef="let planet">{{planet.currentUnits == undefined ? 0 : planet.currentUnits}}</mat-cell>
   </ng-container>
 
@@ -22,3 +22,5 @@
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
 </mat-table>
+
+<mat-paginator></mat-paginator>

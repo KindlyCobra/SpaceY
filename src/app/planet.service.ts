@@ -12,8 +12,8 @@ export class PlanetService {
 
   async getAllPlanets(): Promise<Observable<Planet[]>> {
     const min = 0;
-    const max = 1000;
-    const numPlanets = 50;
+    const max = Number.MAX_SAFE_INTEGER;
+    const numPlanets = 10000;
 
     const planets = Array.from(new Array(numPlanets), () => new Planet(Math.floor((Math.random() * (max - min)) + min)));
     return Promise.resolve(of(planets));
