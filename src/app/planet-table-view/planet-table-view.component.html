@@ -1,25 +1,35 @@
+<mat-form-field>
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium"/>
+</mat-form-field>
+
 <mat-table [dataSource]="planets" matSort>
   <ng-container matColumnDef="address">
     <mat-header-cell *matHeaderCellDef>Address</mat-header-cell>
-    <mat-cell *matCellDef="let planet">{{planet.address.toString(16)}}</mat-cell>
+    <mat-cell *matCellDef="let planet">{{planet.renderAddress()}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef><b>Total: {{myPlanets?.length}}</b></mat-footer-cell>
   </ng-container>
 
   <ng-container matColumnDef="cost">
     <mat-header-cell *matHeaderCellDef mat-sort-header="unitCost">Unit Cost</mat-header-cell>
     <mat-cell *matCellDef="let planet">{{planet.unitCost}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
   </ng-container>
 
   <ng-container matColumnDef="currentUnits">
     <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
     <mat-cell *matCellDef="let planet">{{planet.currentUnits == undefined ? 0 : planet.currentUnits}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
   </ng-container>
 
   <ng-container matColumnDef="currentOwner">
-    <mat-header-cell *matHeaderCellDef>Current Owner</mat-header-cell>
-    <mat-cell *matCellDef="let planet">{{planet.ownedBy == undefined ? 'Not Claimed' : planet.ownedBy}}</mat-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header="ownedBy">Current Owner</mat-header-cell>
+    <mat-cell *matCellDef="let planet">{{planet.renderOwnership(1)}}</mat-cell> <!-- TODO: CurrentPlayer-->
+    <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
   <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
 </mat-table>
 
