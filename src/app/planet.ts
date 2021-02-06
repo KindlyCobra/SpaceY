@@ -3,13 +3,12 @@ import * as hashLib from 'hash.js';
 export class Planet {
 
   public constructor(address: number, ownedBy?: number, currentUnits?: number, universeSize = 10000) {
-// tslint:disable-next-line:no-bitwise
+    // tslint:disable-next-line:no-bitwise
     const magnitude = (universeSize - address) ^ 2;
-    const hash = hashLib.sha256().update(address + magnitude, 'hex').digest();
     this.address = address;
 
     this.unitCost = magnitude; // magnitude + magnitude * hash[0]; // TODO: Calculations
-    this.unitProductionRate = magnitude * hash[1];
+    this.unitProductionRate = Math.ceil(magnitude / 100);
 
     this.ownedBy = ownedBy;
     this.currentUnits = Math.min(currentUnits, this.unitCost);

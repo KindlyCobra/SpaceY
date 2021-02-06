@@ -1,9 +1,9 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {PlanetService} from '../planet.service';
-import {Planet} from '../planet';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
-import {MatPaginator} from '@angular/material/paginator';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { PlanetService } from '../planet.service';
+import { Planet } from '../planet';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-planet-table-view',
@@ -25,18 +25,20 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   players: Set<number>;
 
   async ngOnInit(): Promise<void> {
-    this.promise = this.planetService.getAllPlanets().then(value => value.toPromise()).then(value => new MatTableDataSource(value));
+    this.planetService.onNewPlanets().subscribe({
+      next: value => {
+        this.planets = new MatTableDataSource(value);
+        this.planets.sort = this.sort;
+        this.planets.paginator = this.paginator;
+        this.players = this.planets.data.reduce((acc, planet) => acc.add(planet.ownedBy), new Set<number>());
+        this.planets.filterPredicate = Planet.filterPredicate;
+        this.myPlanets = this.planets.data.filter(planet => planet.ownedBy === 1);
+      }
+    });
+    await this.planetService.loadInitialPlanets();
   }
 
   ngAfterViewInit(): void {
-    this.promise.then(value => {
-      this.planets = value;
-      this.planets.sort = this.sort;
-      this.planets.paginator = this.paginator;
-      this.players = this.planets.data.reduce((acc, planet) => acc.add(planet.ownedBy), new Set<number>());
-      this.planets.filterPredicate = Planet.filterPredicate;
-      this.myPlanets = this.planets.data.filter(planet => planet.ownedBy === 1);
-    });
   }
 
   getTotalOwnedUnits(): number {

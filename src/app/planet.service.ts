@@ -1,30 +1,43 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Planet} from './planet';
+import { Injectable } from '@angular/core';
+import { Observable, Observer, Subject } from 'rxjs';
+import { Planet } from './planet';
+import { EthereumService } from './ethereum.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlanetService {
 
-  constructor() {}
+  private ethereumService: EthereumService;
 
-  async moveUnits(): Promise<void> {
-    return Promise.resolve();
+  private planets: Planet[];
+  private planetsSubject: Subject<Planet[]>;
+
+  constructor(ethereumService: EthereumService) {
+    this.ethereumService = ethereumService;
+    this.planetsSubject = new Subject();
   }
 
-  async getAllPlanets(): Promise<Observable<Planet[]>> {
-    const numPlanets = 10000;
+  onNewPlanets(): Observable<Planet[]> {
+    return this.planetsSubject;
+  }
+
+  async loadInitialPlanets() {
+    await this.ethereumService.connectToMetaMask();
+    const numPlanets = await this.ethereumService.getContract().universeSize();
 
     function randomNumber(min: number, max: number): number {
       return Math.floor((Math.random() * (max - min)) + min);
     }
 
-    const planets = Array.from(new Array(numPlanets), () => {
+    this.planets = new Array(numPlanets);
+
+    for (var i = 0; i <= numPlanets; i++) {
       const isOwned = Math.random() < 0.5;
-      return new Planet(randomNumber(0, numPlanets), isOwned  ? randomNumber(1, 10) : 0, isOwned ? randomNumber(0, 100) : 0);
-    });
-    return Promise.resolve(of(planets));
+      this.planets[i] = new Planet(i, isOwned ? randomNumber(1, 10) : 0, isOwned ? randomNumber(0, 100) : 0, numPlanets);
+    };
+
+    this.planetsSubject.next(this.planets);
   }
 
 }
