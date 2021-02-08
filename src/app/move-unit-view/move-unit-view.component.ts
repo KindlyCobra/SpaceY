@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ethers } from 'ethers';
+import { Transaction } from 'ethers';
 import { EthereumService } from '../ethereum.service';
 import { Planet } from '../planet';
 
@@ -47,19 +47,48 @@ export class MoveUnitViewComponent implements OnInit {
     }
 
     const contract = this.ethereumService.getContract();
-    let sendPlanet = from[0];
+    const provider = this.ethereumService.getProvider();
+
+    let sendPlanet: Planet;
+    let isConquer = this.selectedTo[0].owner != this.ethereumService.getPlayerAddress();
+
+    if (isConquer) {
+      sendPlanet = from[0];
+    } else {
+      sendPlanet = this.selectedTo[0];
+    }
+
+    let moveTransactions = new Array<any>();
 
     for (const planet of from) {
       if (planet == sendPlanet) {
         continue;
       }
-      await contract.moveUnits(planet.id, sendPlanet.id, planet.getTotalUnits());
+      console.info(`Moved ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${sendPlanet.renderPlanetId()}`);
+      moveTransactions.push(await contract.moveUnits(planet.id, sendPlanet.id, planet.getTotalUnits()));
     }
 
-    if (this.selectedTo[0].owner == this.ethereumService.getPlayerAddress()) {
+    if (isConquer) {
+      let moves = new Array<Promise<any>>();
+      moveTransactions.forEach(transaction => {
+        moves.push(provider.waitForTransaction(transaction.hash));
+      });
 
-    } else {
-      await contract.conquerPlanet(sendPlanet.id, this.selectedTo[0].id, sendPlanet.getTotalUnits());
+      console.info(`Waiting for ${moves.length} transactions to clear before scheduling conquer`);
+      await Promise.all(moves);
+      console.info("All moves cleared, execute conquer!")
+
+      let toPlanet = this.selectedTo[0];
+
+      let shouldPlanet = await contract.getPlanet(sendPlanet.id);
+      console.info(`From Planet should have units: ${shouldPlanet.units}`);
+
+      shouldPlanet = await contract.getPlanetStats(toPlanet.id);
+      console.info(`To Planet should have costs: ${shouldPlanet.unitsCost}`);
+
+      console.assert(sendPlanet.getTotalUnits() >= toPlanet.unitCost);
+      console.info(`Conquered ${toPlanet.renderPlanetId()} from ${sendPlanet.renderPlanetId()} with ${sendPlanet.getTotalUnits()} units`);
+      await contract.conquerPlanet(sendPlanet.id, toPlanet.id, sendPlanet.getTotalUnits());
     }
   }
 }

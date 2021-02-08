@@ -51,14 +51,14 @@ export class PlanetService {
     })
 
     contract.on("PlanetConquered", (planetId, player, units) => {
-      console.info(`Player ${player} conquered planet ${planetId}`);
-      this.planets[planetId].conquer(player, units, this.currentBlockNumber);
+      this.syncRealPlanetStats(this.planets[planetId]);
+      this.planets[planetId].conquer(player, units.toNumber(), this.currentBlockNumber);
     });
 
     contract.on("UnitsMoved", (fromPlanetId, toPlanetId, player, units) => {
-      console.info(`Player ${player} moved ${units} units from planet ${fromPlanetId} to ${toPlanetId}`);
-      this.planets[fromPlanetId].moveUnits(-units);
-      this.planets[toPlanetId].moveUnits(units);
+      console.info(`Player ${player} moved ${units} units from planet ${this.planets[fromPlanetId].renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()}`);
+      this.planets[fromPlanetId].moveUnits(-units.toNumber());
+      this.planets[toPlanetId].moveUnits(units.toNumber());
     });
   }
 
@@ -72,11 +72,16 @@ export class PlanetService {
     const promises: Promise<any>[] = new Array(numPlanets);
 
     for (let i = 0; i <= numPlanets; i++) {
-      promises[i] = contract.planets(i).then(result => {
-        this.planets[i] = new Planet(i, numPlanets);
-        if (result.owner !== EthereumService.NULL_ADDRESS) {
-          this.planets[i].conquer(result.owner, result.units, result.conquerBlockNumber);
+      promises[i] = contract.getPlanet(i).then(async result => {
+        let planet = new Planet(i, numPlanets);
+        if (result.owner === this.ethereumService.getPlayerAddress()) {
+          await this.syncRealPlanetStats(planet);
         }
+        if (result.owner !== EthereumService.NULL_ADDRESS) {
+          planet.conquer(result.owner, result.units.toNumber(), result.conquerBlockNumber);
+        }
+        planet.updateDynamicUnits(this.currentBlockNumber);
+        this.planets[i] = planet;
       });
     }
     await Promise.all(promises);
@@ -85,11 +90,17 @@ export class PlanetService {
     this.notifyPlanets();
   }
 
+  private async syncRealPlanetStats(planet: Planet) {
+    let realStats = await this.ethereumService.getContract().getPlanetStats(planet.id);
+    console.info(`Synced real values for planet ${planet.renderPlanetId()}`);
+    planet.syncRealStats(realStats.unitsCost.toNumber(), realStats.unitsCreationRate.toNumber());
+  }
+
   private async isActivePlayer() {
     const contract = this.ethereumService.getContract();
 
-    let result = await contract.playerStartBlocks(this.ethereumService.getPlayerAddress());
-    if (result.toNumber() == 0) {
+    let result = await contract.startPlanets(this.ethereumService.getPlayerAddress());
+    if (result.conquerBlockNumber.toNumber() == 0) {
       console.warn("Player is not active in this universum!")
     } else {
       console.info("Player is active in this universum")
