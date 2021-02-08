@@ -1,30 +1,40 @@
 import * as hashLib from 'hash.js';
 
 export class Planet {
-
-  public constructor(address: number, ownedBy?: number, currentUnits?: number, universeSize = 10000) {
-    // tslint:disable-next-line:no-bitwise
-    const magnitude = (universeSize - address) ^ 2;
-    this.address = address;
-
-    this.unitCost = magnitude; // magnitude + magnitude * hash[0]; // TODO: Calculations
-    this.unitProductionRate = Math.ceil(magnitude / 100);
-
-    this.ownedBy = ownedBy;
-    this.currentUnits = Math.min(currentUnits, this.unitCost);
-  }
-
-  address: number; // ~53-bit integer
-
-  ownedBy?: number;
-  currentUnits?: number;
-
+  readonly planetId: number; // ~53-bit integer
   readonly unitCost: number;
   readonly unitProductionRate: number;
+
+  owner?: string;
+  staticUnits: number;
+  dynamicUnits: number;
+  conquerBlockNumber: number;
+
+  public constructor(planetId: number, universeSize: number) {
+    const magnitude = (universeSize - planetId) ^ 2;
+    this.planetId = planetId;
+
+    this.unitCost = magnitude;
+    this.unitProductionRate = Math.ceil(magnitude / 100);
+
+    this.staticUnits = 0;
+    this.dynamicUnits = 0;
+  }
+
+  conquer(owner: string, staticUnits: number, blockNumber: number) {
+    this.owner = owner;
+    this.staticUnits = staticUnits;
+    this.conquerBlockNumber = blockNumber;
+  }
+
+  moveUnits(units: number) {
+    this.staticUnits += units;
+  }
+
   static filterPredicate(planet: Planet, filter: string): boolean {
     const defaultPredicate = (filterString: string): boolean => {
       // TODO: CurrentPlayer
-      return `${planet.renderAddress()}${planet.unitCost}${planet.unitProductionRate}${planet.currentUnits ?? 0}${planet.renderOwnership(1)}`.toLowerCase().includes(filterString);
+      return `${planet.renderPlanetId()}${planet.unitCost}${planet.unitProductionRate}${planet.staticUnits + planet.dynamicUnits ?? 0}${planet.renderOwnership("0x1")}`.toLowerCase().includes(filterString);
     };
 
     const parts = filter.split(' ');
@@ -38,15 +48,15 @@ export class Planet {
 
           switch (opt) {
             case 'me': {
-              state = state && planet.ownedBy === 1; // FIXME: How to CurrentUser
+              state = state && planet.owner === "0x1"; // FIXME: How to CurrentUser
               break;
             }
             case 'none': {
-              state = state && planet.ownedBy === 0;
+              state = state && planet.owner === "0x0";
               break;
             }
             case 'enemy': {
-              state = state && !(planet.ownedBy === 0 || planet.ownedBy === 1); // FIXME: How to CurrentUser
+              state = state && !(planet.owner === "0x0" || planet.owner === "0x1"); // FIXME: How to CurrentUser
               break;
             }
             default: {
@@ -64,20 +74,20 @@ export class Planet {
     return state && defaultPredicate(filterStrings.join(' '));
   }
 
-  renderAddress(): string {
-    return this.address.toString(16).toUpperCase();
+  renderPlanetId(): string {
+    return "0x" + this.planetId.toString(16).toLowerCase();
   }
 
-  renderOwnership(currentPlayer: number): string {
-    switch (this.ownedBy) {
-      case 0: {
+  renderOwnership(currentPlayer: string): string {
+    switch (this.owner) {
+      case "0x0": {
         return 'None';
       }
       case currentPlayer: {
         return 'Me';
       }
       default: {
-        return 'Enemy';
+        return this.owner;
       }
     }
   }

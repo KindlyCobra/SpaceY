@@ -9,11 +9,14 @@ let spaceYAbi = require('../assets/SpaceY.json');
   providedIn: 'root'
 })
 export class EthereumService {
+  public static readonly NULL_ADDRESS: string = "0x0000000000000000000000000000000000000000";
+
   private provider: ethers.providers.Web3Provider;
   private signer: ethers.Signer;
+  private player_address: string;
 
   private contract: ethers.Contract;
-  private contractAddress: string = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
+  private contractAddress: string = "0xd9145CCE52D386f254917e481eB44e9943F39138";
 
   private initialized: boolean = false;
 
@@ -28,6 +31,7 @@ export class EthereumService {
 
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
     this.signer = this.provider.getSigner();
+    this.player_address = await this.signer.getAddress();
 
     this.contract = new ethers.Contract(this.contractAddress, spaceYAbi["abi"], this.provider).connect(this.signer);
 
@@ -35,10 +39,24 @@ export class EthereumService {
     this.initialized = true;
   }
 
-  getContract(): ethers.Contract {
+  private initializeGuard() {
     if (!this.initialized) {
       throw new Error("Trying to access non initialized ethereum service ...");
     }
+  }
+
+  getContract(): ethers.Contract {
+    this.initializeGuard();
     return this.contract;
+  }
+
+  getProvider(): ethers.providers.Web3Provider {
+    this.initializeGuard();
+    return this.provider;
+  }
+
+  getPlayerAddress(): string {
+    this.initializeGuard();
+    return this.player_address;
   }
 }

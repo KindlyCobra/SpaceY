@@ -11,38 +11,36 @@ import { MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./planet-table-view.component.css']
 })
 
-export class PlanetTableViewComponent implements AfterViewInit, OnInit {
+export class PlanetTableViewComponent implements AfterViewInit {
 
   constructor(private planetService: PlanetService) {
+    this.planetService = planetService;
   }
+
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   displayedColumns = ['address', 'cost', 'currentUnits', 'currentOwner'];
 
-  promise: Promise<MatTableDataSource<Planet>>;
   planets: MatTableDataSource<Planet>;
   myPlanets: Planet[];
-  players: Set<number>;
+  players: Set<string>;
 
-  async ngOnInit(): Promise<void> {
+  ngAfterViewInit(): void {
     this.planetService.onNewPlanets().subscribe({
       next: value => {
         this.planets = new MatTableDataSource(value);
         this.planets.sort = this.sort;
         this.planets.paginator = this.paginator;
-        this.players = this.planets.data.reduce((acc, planet) => acc.add(planet.ownedBy), new Set<number>());
+        //this.players = this.planets.data.reduce((acc, planet) => acc.add(planet.owner), new Set<string>());
         this.planets.filterPredicate = Planet.filterPredicate;
-        this.myPlanets = this.planets.data.filter(planet => planet.ownedBy === 1);
+        this.myPlanets = this.planets.data.filter(planet => planet.owner === "0x1");
       }
     });
-    await this.planetService.loadInitialPlanets();
-  }
-
-  ngAfterViewInit(): void {
+    this.planetService.initialize();
   }
 
   getTotalOwnedUnits(): number {
-    return this.myPlanets?.reduce((acc, planet) => acc + planet.currentUnits, 0);
+    return this.myPlanets?.reduce((acc, planet) => acc + planet.dynamicUnits + planet.staticUnits, 0);
   }
 
   applyFilter(event: KeyboardEvent): void {

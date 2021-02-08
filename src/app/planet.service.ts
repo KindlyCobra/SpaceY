@@ -13,6 +13,8 @@ export class PlanetService {
   private planets: Planet[];
   private planetsSubject: Subject<Planet[]>;
 
+  private currentBlockNumber: number;
+
   constructor(ethereumService: EthereumService) {
     this.ethereumService = ethereumService;
     this.planetsSubject = new Subject();
@@ -22,22 +24,50 @@ export class PlanetService {
     return this.planetsSubject;
   }
 
-  async loadInitialPlanets() {
+  async initialize() {
     await this.ethereumService.connectToMetaMask();
-    const numPlanets = await this.ethereumService.getContract().universeSize();
+    this.currentBlockNumber = await this.ethereumService.getProvider().getBlockNumber();
+    await this.loadInitialPlanets();
+
+    const contract = this.ethereumService.getContract();
+
+    contract.on("PlanetConquered", (planetId, player, units) => {
+      console.info("New planet was conquered");
+      this.planets[planetId].conquer(player, units, this.currentBlockNumber);
+      this.notifyPlanets();
+    })
+  }
+
+  async loadInitialPlanets() {
+    const contract = this.ethereumService.getContract();
+    const numPlanets = await contract.universeSize();
 
     function randomNumber(min: number, max: number): number {
       return Math.floor((Math.random() * (max - min)) + min);
     }
 
     this.planets = new Array(numPlanets);
+    console.info("Starting planet initialisation for " + numPlanets + " planets");
 
-    for (var i = 0; i <= numPlanets; i++) {
-      const isOwned = Math.random() < 0.5;
-      this.planets[i] = new Planet(i, isOwned ? randomNumber(1, 10) : 0, isOwned ? randomNumber(0, 100) : 0, numPlanets);
+    let promises: Promise<any>[] = new Array(numPlanets);
+
+    for (let i = 0; i <= numPlanets; i++) {
+      console.info("Started initalisation for planet: " + numPlanets);
+      promises[i] = contract.planets(i).then(result => {
+        this.planets[i] = new Planet(i, numPlanets);
+        if (result.owner !== EthereumService.NULL_ADDRESS) {
+          this.planets[i].conquer(result.owner, result.units, result.conquerBlockNumber);
+        }
+        console.info("Updated planet: " + numPlanets);
+      });
     };
+    await Promise.all(promises);
+    console.warn("All planets initialized");
+    this.notifyPlanets();
+  }
 
-    this.planetsSubject.next(this.planets);
+  private notifyPlanets() {
+    this.planetsSubject.next(Array.from(this.planets));
   }
 
 }
