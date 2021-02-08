@@ -15,6 +15,8 @@ export class PlanetService {
 
   private currentBlockNumber: number;
 
+  private initialized: boolean = false;
+
   constructor(ethereumService: EthereumService) {
     this.ethereumService = ethereumService;
     this.planetsSubject = new Subject();
@@ -25,7 +27,12 @@ export class PlanetService {
   }
 
   async initialize(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
     await this.ethereumService.connectToMetaMask();
+    Planet.ethereumSerivce = this.ethereumService;
     this.currentBlockNumber = await this.ethereumService.getProvider().getBlockNumber();
     this.isActivePlayer();
     await this.loadInitialPlanets();
@@ -65,13 +72,11 @@ export class PlanetService {
     const promises: Promise<any>[] = new Array(numPlanets);
 
     for (let i = 0; i <= numPlanets; i++) {
-      console.info('Started initalisation for planet: ' + numPlanets);
       promises[i] = contract.planets(i).then(result => {
         this.planets[i] = new Planet(i, numPlanets);
         if (result.owner !== EthereumService.NULL_ADDRESS) {
           this.planets[i].conquer(result.owner, result.units, result.conquerBlockNumber);
         }
-        console.info('Updated planet: ' + numPlanets);
       });
     }
     await Promise.all(promises);

@@ -18,7 +18,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   @Output() selectionChanged = new EventEmitter<Planet[]>();
   displayedColumns: string[];
 
-  constructor(private planetService: PlanetService) {}
+  constructor(private planetService: PlanetService) { }
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -40,6 +40,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
         this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
       }
     });
+    this.planetService.initialize();
   }
 
   getSelected(): Planet[] {
@@ -47,7 +48,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   getTotalOwnedUnits(): number {
-    return this.myPlanets?.reduce((acc, planet) => acc + planet.dynamicUnits + planet.staticUnits, 0);
+    return this.myPlanets?.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
   }
 
   applyFilter(event: KeyboardEvent): void {

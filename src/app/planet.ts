@@ -1,4 +1,7 @@
+import { EthereumService } from "./ethereum.service";
+
 export class Planet {
+  public static ethereumSerivce: EthereumService;
 
   public constructor(planetId: number, universeSize: number) {
     // tslint:disable-next-line:no-bitwise
@@ -11,7 +14,7 @@ export class Planet {
     this.staticUnits = 0;
     this.dynamicUnits = 0;
   }
-  readonly id: number; // ~53-bit integer
+  readonly id: number;
   readonly unitCost: number;
   readonly unitProductionRate: number;
 
@@ -20,18 +23,10 @@ export class Planet {
   dynamicUnits: number;
   conquerBlockNumber: number;
 
-  updateDynamicUnits(blockNumber: number) {
-    if (typeof this.owner == "undefined") {
-      return;
-    }
-    console.assert(blockNumber >= this.conquerBlockNumber);
-    this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
-  }
-
   static filterPredicate(planet: Planet, filter: string): boolean {
     const defaultPredicate = (filterString: string): boolean => {
       // TODO: CurrentPlayer
-      return `${planet.renderPlanetId()}${planet.unitCost}${planet.unitProductionRate}${planet.staticUnits + planet.dynamicUnits ?? 0}${planet.renderOwnership('0x1')}`.toLowerCase().includes(filterString);
+      return `${planet.renderPlanetId()}${planet.unitCost}${planet.unitProductionRate}${planet.getTotalUnits()}${planet.renderOwnership()}`.toLowerCase().includes(filterString);
     };
 
     const parts = filter.split(' ');
@@ -45,15 +40,15 @@ export class Planet {
 
           switch (opt) {
             case 'me': {
-              state = state && planet.owner === '0x1'; // FIXME: How to CurrentUser
+              state = state && planet.owner === Planet.ethereumSerivce.getPlayerAddress();
               break;
             }
             case 'none': {
-              state = state && planet.owner === '0x0';
+              state = state && planet.owner === EthereumService.NULL_ADDRESS;
               break;
             }
             case 'enemy': {
-              state = state && !(planet.owner === '0x0' || planet.owner === '0x1'); // FIXME: How to CurrentUser
+              state = state && !(planet.owner === EthereumService.NULL_ADDRESS || planet.owner === Planet.ethereumSerivce.getPlayerAddress()); // FIXME: How to CurrentUser
               break;
             }
             default: {
@@ -81,17 +76,29 @@ export class Planet {
     this.staticUnits += units;
   }
 
+  updateDynamicUnits(blockNumber: number) {
+    if (typeof this.owner == "undefined") {
+      return;
+    }
+    console.assert(blockNumber >= this.conquerBlockNumber);
+    this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
+  }
+
+  getTotalUnits(): number {
+    return this.staticUnits + this.dynamicUnits;
+  }
+
   renderPlanetId(): string {
     return '0x' + this.id.toString(16).toLowerCase();
   }
 
-  renderOwnership(currentPlayer: string): string {
+  renderOwnership(): string {
     switch (this.owner) {
-      case '0x0': {
-        return 'None';
+      case EthereumService.NULL_ADDRESS: {
+        return 'none';
       }
-      case currentPlayer: {
-        return 'Me';
+      case Planet.ethereumSerivce.getPlayerAddress(): {
+        return 'me';
       }
       default: {
         return this.owner;

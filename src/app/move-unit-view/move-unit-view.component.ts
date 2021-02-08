@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {Planet} from '../planet';
+import { ethers } from 'ethers';
+import { EthereumService } from '../ethereum.service';
+import { Planet } from '../planet';
 
 @Component({
   selector: 'app-move-unit-view',
@@ -11,9 +13,13 @@ export class MoveUnitViewComponent implements OnInit {
   selectedFrom: Planet[] = [];
   selectedTo: Planet[] = [];
 
-  constructor() { }
+  ethereumService: EthereumService;
 
-  ngOnInit(): void {}
+  constructor(ethereumService: EthereumService) {
+    this.ethereumService = ethereumService;
+  }
+
+  ngOnInit(): void { }
 
   onSelectionChanged(where: 'left' | 'right', selection: Planet[]): void {
     if (where === 'left') {
@@ -24,11 +30,11 @@ export class MoveUnitViewComponent implements OnInit {
   }
 
   unitsToMove(): number {
-    return this.selectedFrom.reduce((acc, planet) => acc + planet.dynamicUnits, 0);
+    return this.selectedFrom.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
   }
 
-  moveUnits(): void {
-    const from = this.selectedFrom.filter(planet => planet.owner === '0x1'); // FIXME: CurrentUser
+  async moveUnits(): Promise<void> {
+    const from = this.selectedFrom.filter(planet => planet.owner === this.ethereumService.getPlayerAddress()); // FIXME: CurrentUser
 
     if (!from || from.length === 0) {
       console.log('Select Planet to move from from the left side!');
@@ -40,8 +46,16 @@ export class MoveUnitViewComponent implements OnInit {
       return;
     }
 
+    const contract = this.ethereumService.getContract();
+    let sendPlanet = from[0];
+
     for (const planet of from) {
-      console.log(`Moving ${planet.dynamicUnits} units from ${planet.renderPlanetId()} to ${this.selectedTo[0].renderPlanetId()}.`);
+      if (planet == sendPlanet) {
+        continue;
+      }
+      await contract.moveUnits(planet.id, sendPlanet.id, planet.getTotalUnits());
     }
+
+    await contract.conquerPlanet(sendPlanet.id, this.selectedTo[0].id, sendPlanet.getTotalUnits());
   }
 }

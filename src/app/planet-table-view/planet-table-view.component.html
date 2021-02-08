@@ -22,15 +22,15 @@
       <mat-footer-cell *matFooterCellDef><b>Total: {{myPlanets?.length}}</b></mat-footer-cell>
     </ng-container>
 
-    <ng-container matColumnDef="currentUnits">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.staticUnits + planet.dynamicUnits}}</mat-cell>
-      <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
+    <ng-container matColumnDef="cost">
+      <mat-header-cell *matHeaderCellDef mat-sort-header="unitCost">Unit Cost</mat-header-cell>
+      <mat-cell *matCellDef="let planet">{{planet.staticUnits}}</mat-cell>
+      <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentUnits">
       <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.dynamicUnits == undefined ? 0 : planet.dynamicUnits}}</mat-cell>
+      <mat-cell *matCellDef="let planet">{{planet.staticUnits + planet.dynamicUnits}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
     </ng-container>
 
