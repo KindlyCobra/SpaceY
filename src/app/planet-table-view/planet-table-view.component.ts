@@ -1,10 +1,10 @@
-import {AfterViewInit, Component, OnInit, Output, ViewChild, EventEmitter, Input} from '@angular/core';
-import {PlanetService} from '../planet.service';
-import {Planet} from '../planet';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatCheckboxChange} from '@angular/material/checkbox';
+import { AfterViewInit, Component, OnInit, ViewChild, EventEmitter, Input, Output } from '@angular/core';
+import { PlanetService } from '../planet.service';
+import { Planet } from '../planet';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-planet-table-view',
@@ -19,36 +19,35 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   displayedColumns: string[];
 
   constructor(private planetService: PlanetService) {}
-
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  promise: Promise<MatTableDataSource<Planet>>;
   planets: MatTableDataSource<Planet>;
   myPlanets: Planet[];
   selection: number[] = [];
 
   async ngOnInit(): Promise<void> {
-    this.promise = this.planetService.getAllPlanets().then(value => value.toPromise()).then(value => new MatTableDataSource(value));
     this.displayedColumns = [... this.canSelect ? ['select'] : [], 'address', 'cost', 'currentUnits', 'currentOwner'];
   }
 
   ngAfterViewInit(): void {
-    this.promise.then(value => {
-      this.planets = value;
-      this.planets.sort = this.sort;
-      this.planets.paginator = this.paginator;
-      this.planets.filterPredicate = Planet.filterPredicate;
-      this.myPlanets = this.planets.data.filter(planet => planet.ownedBy === 1);
+    this.planetService.onNewPlanets().subscribe({
+      next: value => {
+        this.planets = new MatTableDataSource(value);
+        this.planets.sort = this.sort;
+        this.planets.paginator = this.paginator;
+        this.planets.filterPredicate = Planet.filterPredicate;
+        this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
+      }
     });
   }
 
   getSelected(): Planet[] {
-    return this.selection?.map(address => this.planets.data.find(planet => planet.address === address));
+    return this.planets.data.filter(planet => this.selection?.includes(planet.id));
   }
 
   getTotalOwnedUnits(): number {
-    return this.myPlanets?.reduce((acc, planet) => acc + planet.currentUnits, 0);
+    return this.myPlanets?.reduce((acc, planet) => acc + planet.dynamicUnits + planet.staticUnits, 0);
   }
 
   applyFilter(event: KeyboardEvent): void {
@@ -61,7 +60,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
 
   changeSelectAll(change: MatCheckboxChange): void {
     if (change.checked) {
-      this.selection = this.planets.filteredData.map(planet => planet.address);
+      this.selection = this.planets.filteredData.map(planet => planet.id);
     } else {
       this.selection = [];
     }
@@ -71,9 +70,9 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
 
   changeSelectOne(planet: Planet, change: MatCheckboxChange): void {
     if (change.checked) {
-      this.selection.push(planet.address);
+      this.selection.push(planet.id);
     } else {
-      this.selection = this.selection.filter(address => address !== planet.address);
+      this.selection = this.selection.filter(id => id !== planet.id);
     }
 
     this.selectionChanged.emit(this.getSelected());

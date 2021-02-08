@@ -1,30 +1,73 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Planet} from './planet';
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { Planet } from './planet';
+import { EthereumService } from './ethereum.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlanetService {
 
-  constructor() {}
+  private ethereumService: EthereumService;
 
-  async moveUnits(): Promise<void> {
-    return Promise.resolve();
+  private planets: Planet[];
+  private planetsSubject: Subject<Planet[]>;
+
+  private currentBlockNumber: number;
+
+  constructor(ethereumService: EthereumService) {
+    this.ethereumService = ethereumService;
+    this.planetsSubject = new Subject();
   }
 
-  async getAllPlanets(): Promise<Observable<Planet[]>> {
-    const numPlanets = 10000;
+  onNewPlanets(): Observable<Planet[]> {
+    return this.planetsSubject;
+  }
+
+  async initialize(): Promise<void> {
+    await this.ethereumService.connectToMetaMask();
+    this.currentBlockNumber = await this.ethereumService.getProvider().getBlockNumber();
+    await this.loadInitialPlanets();
+
+    const contract = this.ethereumService.getContract();
+
+    contract.on('PlanetConquered', (planetId, player, units) => {
+      console.info('New planet was conquered');
+      this.planets[planetId].conquer(player, units, this.currentBlockNumber);
+      this.notifyPlanets();
+    });
+  }
+
+  async loadInitialPlanets(): Promise<void> {
+    const contract = this.ethereumService.getContract();
+    const numPlanets = await contract.universeSize();
 
     function randomNumber(min: number, max: number): number {
       return Math.floor((Math.random() * (max - min)) + min);
     }
 
-    const planets = Array.from(new Array(numPlanets), () => {
-      const isOwned = Math.random() < 0.5;
-      return new Planet(randomNumber(0, numPlanets), isOwned  ? randomNumber(1, 10) : 0, isOwned ? randomNumber(0, 100) : 0);
-    });
-    return Promise.resolve(of(planets));
+    this.planets = new Array(numPlanets);
+    console.info('Starting planet initialisation for ' + numPlanets + ' planets');
+
+    const promises: Promise<any>[] = new Array(numPlanets);
+
+    for (let i = 0; i <= numPlanets; i++) {
+      console.info('Started initalisation for planet: ' + numPlanets);
+      promises[i] = contract.planets(i).then(result => {
+        this.planets[i] = new Planet(i, numPlanets);
+        if (result.owner !== EthereumService.NULL_ADDRESS) {
+          this.planets[i].conquer(result.owner, result.units, result.conquerBlockNumber);
+        }
+        console.info('Updated planet: ' + numPlanets);
+      });
+    }
+    await Promise.all(promises);
+    console.warn('All planets initialized');
+    this.notifyPlanets();
+  }
+
+  private notifyPlanets(): void {
+    this.planetsSubject.next(Array.from(this.planets));
   }
 
 }
