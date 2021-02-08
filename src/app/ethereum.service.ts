@@ -16,7 +16,7 @@ export class EthereumService {
   private player_address: string;
 
   private contract: ethers.Contract;
-  private contractAddress: string = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+  private contractAddress: string = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 
   private initialized: boolean = false;
 

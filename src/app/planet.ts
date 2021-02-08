@@ -1,5 +1,3 @@
-import * as hashLib from 'hash.js';
-
 export class Planet {
   readonly planetId: number; // ~53-bit integer
   readonly unitCost: number;
@@ -29,6 +27,14 @@ export class Planet {
 
   moveUnits(units: number) {
     this.staticUnits += units;
+  }
+
+  updateDynamicUnits(blockNumber: number) {
+    if (typeof this.owner == "undefined") {
+      return;
+    }
+    console.assert(blockNumber >= this.conquerBlockNumber);
+    this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
   }
 
   static filterPredicate(planet: Planet, filter: string): boolean {
