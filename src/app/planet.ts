@@ -82,6 +82,7 @@ export class Planet {
     }
     console.assert(blockNumber >= this.conquerBlockNumber);
     this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
+    console.info("Updated planetid " + this.id + " to " + this.dynamicUnits);
   }
 
   getTotalUnits(): number {

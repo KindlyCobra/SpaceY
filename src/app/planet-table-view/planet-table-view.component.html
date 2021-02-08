@@ -24,19 +24,19 @@
 
     <ng-container matColumnDef="cost">
       <mat-header-cell *matHeaderCellDef mat-sort-header="unitCost">Unit Cost</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.staticUnits}}</mat-cell>
+      <mat-cell *matCellDef="let planet">{{planet.unitCost}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentUnits">
       <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.staticUnits + planet.dynamicUnits}}</mat-cell>
+      <mat-cell *matCellDef="let planet">{{planet.getTotalUnits()}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentOwner">
       <mat-header-cell *matHeaderCellDef mat-sort-header="ownedBy">Current Owner</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.renderOwnership('0x1')}}</mat-cell> <!-- TODO: CurrentPlayer-->
+      <mat-cell *matCellDef="let planet">{{planet.renderOwnership()}}</mat-cell> <!-- TODO: CurrentPlayer-->
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 

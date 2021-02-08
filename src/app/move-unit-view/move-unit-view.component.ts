@@ -34,7 +34,7 @@ export class MoveUnitViewComponent implements OnInit {
   }
 
   async moveUnits(): Promise<void> {
-    const from = this.selectedFrom.filter(planet => planet.owner === this.ethereumService.getPlayerAddress()); // FIXME: CurrentUser
+    const from = this.selectedFrom.filter(planet => planet.owner === this.ethereumService.getPlayerAddress());
 
     if (!from || from.length === 0) {
       console.log('Select Planet to move from from the left side!');
@@ -56,6 +56,10 @@ export class MoveUnitViewComponent implements OnInit {
       await contract.moveUnits(planet.id, sendPlanet.id, planet.getTotalUnits());
     }
 
-    await contract.conquerPlanet(sendPlanet.id, this.selectedTo[0].id, sendPlanet.getTotalUnits());
+    if (this.selectedTo[0].owner == this.ethereumService.getPlayerAddress()) {
+
+    } else {
+      await contract.conquerPlanet(sendPlanet.id, this.selectedTo[0].id, sendPlanet.getTotalUnits());
+    }
   }
 }
