@@ -1,5 +1,3 @@
-import * as hashLib from 'hash.js';
-
 export class Planet {
 
   public constructor(planetId: number, universeSize: number) {
@@ -21,6 +19,14 @@ export class Planet {
   staticUnits: number;
   dynamicUnits: number;
   conquerBlockNumber: number;
+
+  updateDynamicUnits(blockNumber: number) {
+    if (typeof this.owner == "undefined") {
+      return;
+    }
+    console.assert(blockNumber >= this.conquerBlockNumber);
+    this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
+  }
 
   static filterPredicate(planet: Planet, filter: string): boolean {
     const defaultPredicate = (filterString: string): boolean => {

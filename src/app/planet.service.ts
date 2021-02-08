@@ -27,24 +27,37 @@ export class PlanetService {
   async initialize(): Promise<void> {
     await this.ethereumService.connectToMetaMask();
     this.currentBlockNumber = await this.ethereumService.getProvider().getBlockNumber();
+    this.isActivePlayer();
     await this.loadInitialPlanets();
+    this.subscribeToEvents();
+  }
 
+  private async subscribeToEvents() {
     const contract = this.ethereumService.getContract();
+    const provider = this.ethereumService.getProvider();
 
-    contract.on('PlanetConquered', (planetId, player, units) => {
-      console.info('New planet was conquered');
-      this.planets[planetId].conquer(player, units, this.currentBlockNumber);
+    provider.on("block", (blockNumber) => {
+      console.info("Received block " + blockNumber);
+      this.currentBlockNumber = blockNumber;
+      this.updateDynamicUnits();
       this.notifyPlanets();
+    })
+
+    contract.on("PlanetConquered", (planetId, player, units) => {
+      console.info(`Player ${player} conquered planet ${planetId}`);
+      this.planets[planetId].conquer(player, units, this.currentBlockNumber);
+    });
+
+    contract.on("UnitsMoved", (fromPlanetId, toPlanetId, player, units) => {
+      console.info(`Player ${player} moved ${units} units from planet ${fromPlanetId} to ${toPlanetId}`);
+      this.planets[fromPlanetId].moveUnits(-units);
+      this.planets[toPlanetId].moveUnits(units);
     });
   }
 
-  async loadInitialPlanets(): Promise<void> {
+  private async loadInitialPlanets() {
     const contract = this.ethereumService.getContract();
     const numPlanets = await contract.universeSize();
-
-    function randomNumber(min: number, max: number): number {
-      return Math.floor((Math.random() * (max - min)) + min);
-    }
 
     this.planets = new Array(numPlanets);
     console.info('Starting planet initialisation for ' + numPlanets + ' planets');
@@ -62,11 +75,30 @@ export class PlanetService {
       });
     }
     await Promise.all(promises);
-    console.warn('All planets initialized');
+    console.warn("All planets initialized");
+
     this.notifyPlanets();
   }
 
-  private notifyPlanets(): void {
+  private async isActivePlayer() {
+    const contract = this.ethereumService.getContract();
+
+    let result = await contract.playerStartBlocks(this.ethereumService.getPlayerAddress());
+    if (result.toNumber() == 0) {
+      console.warn("Player is not active in this universum!")
+    } else {
+      console.info("Player is active in this universum")
+    }
+  }
+
+  private updateDynamicUnits() {
+    this.planets.forEach(planet => {
+      planet.updateDynamicUnits(this.currentBlockNumber);
+    });
+  }
+
+  private notifyPlanets() {
+    console.info("Updating planets");
     this.planetsSubject.next(Array.from(this.planets));
   }
 
