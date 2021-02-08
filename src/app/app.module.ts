@@ -12,11 +12,14 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatGridListModule} from '@angular/material/grid-list';
+import { MoveUnitViewComponent } from './move-unit-view/move-unit-view.component';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PlanetTableViewComponent
+    PlanetTableViewComponent,
+    MoveUnitViewComponent
   ],
     imports: [
         BrowserModule,
@@ -29,6 +32,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
         MatFormFieldModule,
         MatInputModule,
         MatGridListModule,
+        MatCheckboxModule,
     ],
   providers: [],
   bootstrap: [AppComponent]
