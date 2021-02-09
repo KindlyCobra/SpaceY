@@ -13,10 +13,10 @@ export class EthereumService {
 
   private provider: ethers.providers.Web3Provider;
   private signer: ethers.Signer;
-  private player_address: string;
+  private playerAddress: string;
 
   private contract: ethers.Contract;
-  private contractAddress = '0x11484deEfA832CCbA9e13e977Eb5eB4fD0a0A359';
+  private contractAddress = '0xb2A8A20610E82B4344C263d5dC046EB4b1d05fFF';
 
   private initialized = false;
 
@@ -31,11 +31,11 @@ export class EthereumService {
 
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
     this.signer = this.provider.getSigner();
-    this.player_address = await this.signer.getAddress();
+    this.playerAddress = await this.signer.getAddress();
 
     this.contract = new ethers.Contract(this.contractAddress, spaceYAbi.abi, this.provider).connect(this.signer);
 
-    console.info('Initialized EthereumSerivce for account: ' + this.player_address);
+    console.info('Initialized EthereumSerivce for account: ' + this.playerAddress);
     this.initialized = true;
   }
 
@@ -57,6 +57,6 @@ export class EthereumService {
 
   getPlayerAddress(): string {
     this.initializeGuard();
-    return this.player_address;
+    return this.playerAddress;
   }
 }

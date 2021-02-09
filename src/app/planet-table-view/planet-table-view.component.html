@@ -35,7 +35,7 @@
     </ng-container>
 
     <ng-container matColumnDef="productionRate">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="productionRate">Current Units</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="productionRate">Unit Production Rate</mat-header-cell>
       <mat-cell *matCellDef="let planet">{{planet.unitProductionRate}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalUnitProductionRate()}}</mat-footer-cell>
     </ng-container>

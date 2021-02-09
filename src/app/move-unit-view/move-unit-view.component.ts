@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ethers } from 'ethers';
+import { Transaction } from 'ethers';
 import { EthereumService } from '../ethereum.service';
 import { Planet } from '../planet';
+import { PlanetTableViewComponent } from '../planet-table-view/planet-table-view.component';
 
 @Component({
   selector: 'app-move-unit-view',
@@ -47,19 +48,22 @@ export class MoveUnitViewComponent implements OnInit {
     }
 
     const contract = this.ethereumService.getContract();
-    let sendPlanet = from[0];
 
-    for (const planet of from) {
-      if (planet == sendPlanet) {
-        continue;
+    const isConquer = this.selectedTo[0].owner !== this.ethereumService.getPlayerAddress();
+    const toPlanet = this.selectedTo[0];
+
+    if (!isConquer) {
+      for (const planet of from) {
+        console.info(`Moving ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${toPlanet.renderPlanetId()}`);
+        contract.moveUnits(planet.id, toPlanet.id, planet.getTotalUnits());
       }
-      await contract.moveUnits(planet.id, sendPlanet.id, planet.getTotalUnits());
-    }
-
-    if (this.selectedTo[0].owner == this.ethereumService.getPlayerAddress()) {
-
     } else {
-      await contract.conquerPlanet(sendPlanet.id, this.selectedTo[0].id, sendPlanet.getTotalUnits());
+      const totalUnits = from.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
+      const fromUnitAmounts = from.map(planet => planet.getTotalUnits());
+      const fromPlanetIds = from.map(planet => planet.id);
+      console.assert(totalUnits >= toPlanet.unitCost);
+      console.info(`Conquering ${toPlanet.renderPlanetId()} from [${fromPlanetIds}] with [${fromUnitAmounts}] => ${totalUnits} units`);
+      await contract.conquerPlanet(fromPlanetIds, toPlanet.id, fromUnitAmounts);
     }
   }
 }

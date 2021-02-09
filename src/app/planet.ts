@@ -4,24 +4,27 @@ export class Planet {
   public static ethereumService: EthereumService;
 
   public constructor(planetId: number, universeSize: number) {
-    // tslint:disable-next-line:no-bitwise
-    const magnitude = (universeSize - planetId) ^ 2;
+    const magnitude = Math.pow(universeSize - planetId, 2);
     this.id = planetId;
 
     this.unitCost = magnitude;
-    this.unitProductionRate = Math.ceil(magnitude / 100);
+    const productionRate = Math.ceil(magnitude / 100.0);
+    this.unitProductionRate = productionRate > 0 ? productionRate : 1;
 
     this.staticUnits = 0;
     this.dynamicUnits = 0;
   }
-  readonly id: number;
-  readonly unitCost: number;
-  readonly unitProductionRate: number;
 
-  owner?: string;
+  readonly id: number;
+  unitCost: number;
+  unitProductionRate: number;
+
+  owner: string = EthereumService.NULL_ADDRESS;
   staticUnits: number;
   dynamicUnits: number;
   conquerBlockNumber: number;
+
+  isSynced = false;
 
   static filterPredicate(planet: Planet, filter: string): boolean {
     const defaultPredicate = (filterString: string): boolean => {
@@ -67,6 +70,7 @@ export class Planet {
   }
 
   conquer(owner: string, staticUnits: number, blockNumber: number): void {
+    console.info(`Player ${owner} conquered planet ${this.id} with ${staticUnits} units @${blockNumber}`);
     this.owner = owner;
     this.staticUnits = staticUnits;
     this.conquerBlockNumber = blockNumber;
@@ -77,12 +81,18 @@ export class Planet {
   }
 
   updateDynamicUnits(blockNumber: number): void {
-    if (typeof this.owner === 'undefined') {
+    if (this.owner === EthereumService.NULL_ADDRESS) {
       return;
     }
     console.assert(blockNumber >= this.conquerBlockNumber);
     this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
-    console.info(`Updated planetid ${this.id} to ${this.dynamicUnits}`);
+    console.log(`Updated total units on ${this.renderPlanetId()} to ${this.getTotalUnits()}(${this.staticUnits}/${this.dynamicUnits})`);
+  }
+
+  syncRealStats(unitCost: number, productionRate: number): void {
+    this.isSynced = true;
+    this.unitCost = unitCost;
+    this.unitProductionRate = productionRate;
   }
 
   getTotalUnits(): number {

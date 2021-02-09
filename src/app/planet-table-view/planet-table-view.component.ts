@@ -27,7 +27,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   selection: number[] = [];
 
   async ngOnInit(): Promise<void> {
-    this.displayedColumns = [... this.canSelect ? ['select'] : [], 'address', 'cost', 'currentUnits', 'currentOwner'];
+    this.displayedColumns = [... this.canSelect ? ['select'] : [], 'address', 'cost', 'currentUnits', 'productionRate', 'currentOwner'];
   }
 
   ngAfterViewInit(): void {
@@ -63,7 +63,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   getTotalUnitProductionRate(): number {
-    return this.planets.data.reduce((acc, planet) => acc + planet.unitProductionRate, 0);
+    return this.planets?.filteredData.reduce((acc, planet) => acc + planet.unitProductionRate, 0);
   }
 
   applyFilter(event: KeyboardEvent): void {
