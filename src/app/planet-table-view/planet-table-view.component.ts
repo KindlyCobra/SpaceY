@@ -62,6 +62,10 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
     return this.myPlanets?.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
   }
 
+  getTotalUnitProductionRate(): number {
+    return this.planets.data.reduce((acc, planet) => acc + planet.unitProductionRate, 0);
+  }
+
   applyFilter(event: KeyboardEvent): void {
     if (!this.planets || event.key !== 'Enter') {
       return;
