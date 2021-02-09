@@ -1,7 +1,7 @@
-import { EthereumService } from "./ethereum.service";
+import { EthereumService } from './ethereum.service';
 
 export class Planet {
-  public static ethereumSerivce: EthereumService;
+  public static ethereumService: EthereumService;
 
   public constructor(planetId: number, universeSize: number) {
     // tslint:disable-next-line:no-bitwise
@@ -40,7 +40,7 @@ export class Planet {
 
           switch (opt) {
             case 'me': {
-              state = state && planet.owner === Planet.ethereumSerivce.getPlayerAddress();
+              state = state && planet.owner === Planet.ethereumService.getPlayerAddress();
               break;
             }
             case 'none': {
@@ -48,7 +48,7 @@ export class Planet {
               break;
             }
             case 'enemy': {
-              state = state && !(planet.owner === EthereumService.NULL_ADDRESS || planet.owner === Planet.ethereumSerivce.getPlayerAddress()); // FIXME: How to CurrentUser
+              state = state && !(planet.owner === EthereumService.NULL_ADDRESS || planet.owner === Planet.ethereumService.getPlayerAddress()); // FIXME: How to CurrentUser
               break;
             }
             default: {
@@ -76,13 +76,13 @@ export class Planet {
     this.staticUnits += units;
   }
 
-  updateDynamicUnits(blockNumber: number) {
-    if (typeof this.owner == "undefined") {
+  updateDynamicUnits(blockNumber: number): void {
+    if (typeof this.owner === 'undefined') {
       return;
     }
     console.assert(blockNumber >= this.conquerBlockNumber);
     this.dynamicUnits = (blockNumber - this.conquerBlockNumber) * this.unitProductionRate;
-    console.info("Updated planetid " + this.id + " to " + this.dynamicUnits);
+    console.info(`Updated planetid ${this.id} to ${this.dynamicUnits}`);
   }
 
   getTotalUnits(): number {
@@ -98,7 +98,7 @@ export class Planet {
       case EthereumService.NULL_ADDRESS: {
         return 'none';
       }
-      case Planet.ethereumSerivce.getPlayerAddress(): {
+      case Planet.ethereumService.getPlayerAddress(): {
         return 'me';
       }
       default: {

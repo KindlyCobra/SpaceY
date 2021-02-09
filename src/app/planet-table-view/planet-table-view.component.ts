@@ -31,16 +31,27 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit(): void {
+    if (this.planetService.planetCache) {
+      this.updateTableData(this.planetService.planetCache);
+    }
+
     this.planetService.onNewPlanets().subscribe({
-      next: value => {
-        this.planets = new MatTableDataSource(value);
-        this.planets.sort = this.sort;
-        this.planets.paginator = this.paginator;
-        this.planets.filterPredicate = Planet.filterPredicate;
-        this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
-      }
+      next: value => this.updateTableData(value)
     });
-    this.planetService.initialize();
+  }
+
+  private updateTableData(value: Planet[]): void {
+      const currentFilter = this.planets?.filter;
+
+      this.planets = new MatTableDataSource(value);
+      this.planets.sort = this.sort;
+      this.planets.paginator = this.paginator;
+      this.planets.filterPredicate = Planet.filterPredicate;
+      this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
+
+      if (currentFilter) {
+        this.planets.filter = currentFilter;
+      }
   }
 
   getSelected(): Planet[] {

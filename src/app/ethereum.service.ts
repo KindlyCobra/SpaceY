@@ -16,7 +16,7 @@ export class EthereumService {
   private player_address: string;
 
   private contract: ethers.Contract;
-  private contractAddress: string = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
+  private contractAddress = '0x11484deEfA832CCbA9e13e977Eb5eB4fD0a0A359';
 
   private initialized = false;
 
@@ -35,7 +35,7 @@ export class EthereumService {
 
     this.contract = new ethers.Contract(this.contractAddress, spaceYAbi.abi, this.provider).connect(this.signer);
 
-    console.info('Initialized EthereumSerivce');
+    console.info('Initialized EthereumSerivce for account: ' + this.player_address);
     this.initialized = true;
   }
 
