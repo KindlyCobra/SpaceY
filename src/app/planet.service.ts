@@ -51,14 +51,25 @@ export class PlanetService {
     })
 
     contract.on("PlanetConquered", (planetId, player, units) => {
-      this.syncRealPlanetStats(this.planets[planetId]);
-      this.planets[planetId].conquer(player, units.toNumber(), this.currentBlockNumber);
+      let planet = this.planets[planetId];
+      this.syncRealPlanetStats(planet);
+      planet.conquer(player, units.toNumber(), this.currentBlockNumber);
+      this.fetchAndPrintSyncDrift(planetId);
+    });
+
+    contract.on("UnitsSendToConquer", (fromPlanetId, toPlanetId, player, units) => {
+      let fromPlanet = this.planets[fromPlanetId];
+      console.info(`Player ${player} sended ${units} units from planet ${fromPlanet.renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()} to conquer it`);
+      fromPlanet.moveUnits(-units.toNumber());
+      this.fetchAndPrintSyncDrift(fromPlanetId);
     });
 
     contract.on("UnitsMoved", (fromPlanetId, toPlanetId, player, units) => {
       console.info(`Player ${player} moved ${units} units from planet ${this.planets[fromPlanetId].renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()}`);
       this.planets[fromPlanetId].moveUnits(-units.toNumber());
       this.planets[toPlanetId].moveUnits(units.toNumber());
+      this.fetchAndPrintSyncDrift(fromPlanetId);
+      this.fetchAndPrintSyncDrift(toPlanetId);
     });
   }
 
@@ -91,9 +102,17 @@ export class PlanetService {
   }
 
   private async syncRealPlanetStats(planet: Planet) {
-    let realStats = await this.ethereumService.getContract().getPlanetStats(planet.id);
-    console.info(`Synced real values for planet ${planet.renderPlanetId()}`);
-    planet.syncRealStats(realStats.unitsCost.toNumber(), realStats.unitsCreationRate.toNumber());
+    if (!planet.isSynced) {
+      let realStats = await this.ethereumService.getContract().getPlanetStats(planet.id);
+      console.info(`Synced real values for planet ${planet.renderPlanetId()}`);
+      planet.syncRealStats(realStats.unitsCost.toNumber(), realStats.unitsCreationRate.toNumber());
+    }
+  }
+
+  private async fetchAndPrintSyncDrift(planetId: number) {
+    let result = await this.ethereumService.getContract().getUnitsOnPlanet(planetId);
+    let planet = this.planets[planetId];
+    console.info(`Received planet update for ${planet.renderPlanetId()}, is: ${planet.getTotalUnits()} should: ${result.toNumber()}`);
   }
 
   private async isActivePlayer() {

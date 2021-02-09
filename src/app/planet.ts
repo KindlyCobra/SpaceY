@@ -24,6 +24,8 @@ export class Planet {
   dynamicUnits: number;
   conquerBlockNumber: number;
 
+  isSynced: boolean = false;
+
   static filterPredicate(planet: Planet, filter: string): boolean {
     const defaultPredicate = (filterString: string): boolean => {
       // TODO: CurrentPlayer
@@ -88,6 +90,7 @@ export class Planet {
   }
 
   syncRealStats(unitCost: number, productionRate: number) {
+    this.isSynced = true;
     this.unitCost = unitCost;
     this.unitProductionRate = productionRate;
   }
