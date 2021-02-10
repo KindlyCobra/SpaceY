@@ -14,10 +14,8 @@ export class MoveUnitViewComponent implements OnInit {
   selectedFrom: Planet[] = [];
   selectedTo: Planet[] = [];
 
-  ethereumService: EthereumService;
 
-  constructor(ethereumService: EthereumService) {
-    this.ethereumService = ethereumService;
+  constructor(private ethereumService: EthereumService) {
   }
 
   ngOnInit(): void { }

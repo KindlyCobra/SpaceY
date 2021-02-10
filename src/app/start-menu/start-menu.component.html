@@ -1,0 +1,10 @@
+<p>Welcome to SpaceY</p>
+
+<mat-tab-group [selectedIndex]="tabIndex">
+    <mat-tab label="Connect to MetaMask"></mat-tab>
+    <mat-tab label="Choose an Universe">
+        <app-choose-universe (universeSelected)="onUniverseSelected($event)"></app-choose-universe>
+    </mat-tab>
+    <mat-tab label="Validate Universe"></mat-tab>
+    <mat-tab label="Buy initial planet"></mat-tab>
+</mat-tab-group>

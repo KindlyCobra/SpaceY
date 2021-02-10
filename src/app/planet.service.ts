@@ -29,9 +29,7 @@ export class PlanetService {
     }
     this.initialized = true;
     Planet.ethereumService = this.ethereumService;
-    await this.ethereumService.connectToMetaMask();
     this.currentBlockNumber = await this.ethereumService.getProvider().getBlockNumber();
-    this.isActivePlayer();
     await this.loadInitialPlanets();
     this.subscribeToEvents();
   }
@@ -114,17 +112,6 @@ export class PlanetService {
     const result = await this.ethereumService.getContract().getUnitsOnPlanet(planetId);
     const planet = this.planets[planetId];
     console.info(`Received planet update for ${planet.renderPlanetId()}, is: ${planet.getTotalUnits()} should: ${result.toNumber()}`);
-  }
-
-  private async isActivePlayer(): Promise<void> {
-    const contract = this.ethereumService.getContract();
-
-    const result = await contract.startPlanets(this.ethereumService.getPlayerAddress());
-    if (result.conquerBlockNumber.toNumber() === 0) {
-      console.warn('Player is not active in this universum!');
-    } else {
-      console.info('Player is active in this universum');
-    }
   }
 
   private updateDynamicUnits(): void {

@@ -16,14 +16,17 @@ export class EthereumService {
   private playerAddress: string;
 
   private contract: ethers.Contract;
-  private contractAddress = '0xb2A8A20610E82B4344C263d5dC046EB4b1d05fFF';
+  private contractAddress: string;
 
   private initialized = false;
 
-  async connectToMetaMask(): Promise<void> {
+  async initialize(contractAddress: string): Promise<void> {
     if (this.initialized) {
-      return;
+      throw Error("EthereumService is already initialized @" + this.contractAddress);
     }
+
+    this.contractAddress = contractAddress;
+
     await detectEthereumProvider({ mustBeMetaMask: true });
 
     const ethereum: any = window.ethereum;
@@ -43,6 +46,12 @@ export class EthereumService {
     if (!this.initialized) {
       throw new Error('Trying to access non initialized ethereum service ...');
     }
+  }
+
+  async isActivePlayer(): Promise<boolean> {
+    this.initializeGuard();
+    const result = await this.contract.startPlanets(this.getPlayerAddress());
+    return result.conquerBlockNumber.toNumber() === 0;
   }
 
   getContract(): ethers.Contract {
