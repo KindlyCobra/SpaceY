@@ -25,6 +25,9 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   planets: MatTableDataSource<Planet>;
   myPlanets: Planet[];
   selection: number[] = [];
+  selectedOp: string;
+  currentUnitFilter: string;
+  search: string;
 
   async ngOnInit(): Promise<void> {
     this.displayedColumns = [... this.canSelect ? ['select'] : [], 'address', 'cost', 'currentUnits', 'productionRate', 'currentOwner'];
@@ -41,17 +44,12 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   private updateTableData(value: Planet[]): void {
-      const currentFilter = this.planets?.filter;
-
       this.planets = new MatTableDataSource(value);
       this.planets.sort = this.sort;
       this.planets.paginator = this.paginator;
       this.planets.filterPredicate = Planet.filterPredicate;
       this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
-
-      if (currentFilter) {
-        this.planets.filter = currentFilter;
-      }
+      this.applyFilter();
   }
 
   getSelected(): Planet[] {
@@ -66,12 +64,12 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
     return this.planets?.filteredData.reduce((acc, planet) => acc + planet.unitProductionRate, 0);
   }
 
-  applyFilter(event: KeyboardEvent): void {
-    if (!this.planets || event.key !== 'Enter') {
+  applyFilter(): void {
+    if (!this.planets) {
       return;
     }
 
-    this.planets.filter = (event.target as HTMLInputElement).value.toLowerCase().trim();
+    this.planets.filter = this.search?.trim();
   }
 
   changeSelectAll(change: MatCheckboxChange): void {

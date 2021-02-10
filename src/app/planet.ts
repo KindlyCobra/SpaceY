@@ -1,7 +1,6 @@
-import { EthereumService } from './ethereum.service';
+import {EthereumService} from './ethereum.service';
 
 export class Planet {
-  public static ethereumService: EthereumService;
 
   public constructor(planetId: number, universeSize: number) {
     const magnitude = Math.pow(universeSize - planetId, 2);
@@ -14,6 +13,7 @@ export class Planet {
     this.staticUnits = 0;
     this.dynamicUnits = 0;
   }
+  public static ethereumService: EthereumService;
 
   readonly id: number;
   unitCost: number;
@@ -32,38 +32,89 @@ export class Planet {
       return `${planet.renderPlanetId()}${planet.unitCost}${planet.unitProductionRate}${planet.getTotalUnits()}${planet.renderOwnership()}`.toLowerCase().includes(filterString);
     };
 
-    const parts = filter.split(' ');
+    let parts = filter.split(' ');
     let state = true;
 
-    const filterStrings = [];
-    for (let i = 0; i < parts.length; i++) {
-      switch (parts[i]) {
-        case 'ownedby:': {
-          const opt = parts[++i];
+    parts = parts.map(part => {
+      switch (part.toLowerCase()) {
+        case '$me':
+          return Planet.ethereumService.getPlayerAddress();
+        case '$none':
+          return EthereumService.NULL_ADDRESS;
+        default:
+          return part;
+      }
+    });
 
-          switch (opt) {
-            case 'me': {
-              state = state && planet.owner === Planet.ethereumService.getPlayerAddress();
-              break;
-            }
-            case 'none': {
-              state = state && planet.owner === EthereumService.NULL_ADDRESS;
-              break;
-            }
-            case 'enemy': {
-              state = state && !(planet.owner === EthereumService.NULL_ADDRESS || planet.owner === Planet.ethereumService.getPlayerAddress()); // FIXME: How to CurrentUser
-              break;
-            }
-            default: {
-              throw new Error('Unknown "ownedBy:" selector ' + opt);
-            }
+    const filterStrings = [];
+
+    try {
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i].startsWith('#')) {
+          const accessor = parts[i].slice(1);
+          if (!(accessor in planet)) {
+            // console.log(accessor + ' not found in planet.');
+            continue;
+          } else if (planet[accessor] === undefined) {
+            return false;
           }
-          break;
-        }
-        default: {
+
+          let operation: (a, b) => boolean;
+
+          switch (parts[++i].toLowerCase()) {
+            case '>':
+            case 'gt':
+              operation = (a, b) => a > b;
+              break;
+
+            case '<':
+            case 'lt':
+              operation = (a, b) => a < b;
+              break;
+
+            case '>=':
+            case 'gte':
+              operation = (a, b) => a >= b;
+              break;
+
+
+            case '<=':
+            case 'lte':
+              operation = (a, b) => a <= b;
+              break;
+
+            case 'eq':
+            case '=':
+              operation = (a, b) => a === b;
+              break;
+
+            case 'neq':
+            case '!=':
+              operation = (a, b) => a !== b;
+              break;
+
+            default:
+              operation = () => true;
+          }
+
+          let operand: number | string;
+
+          if (typeof planet[accessor] === 'number') {
+            operand = Number.parseFloat(parts[++i]);
+            if (Number.isNaN(operand)) {
+              return true;
+            }
+          } else {
+            operand = parts[++i];
+          }
+
+          state &&= operation(planet[accessor], operand);
+        } else {
           filterStrings.push(parts[i]);
         }
       }
+    } catch (e) {
+      return true;
     }
 
     return state && defaultPredicate(filterStrings.join(' '));
@@ -93,6 +144,10 @@ export class Planet {
     this.isSynced = true;
     this.unitCost = unitCost;
     this.unitProductionRate = productionRate;
+  }
+
+  get units(): number {
+    return this.getTotalUnits();
   }
 
   getTotalUnits(): number {

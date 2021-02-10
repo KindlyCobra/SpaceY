@@ -1,9 +1,8 @@
 <div>
-  <mat-form-field>
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" />
-  </mat-form-field>
-
+    <mat-form-field style="width: 95%">
+      <mat-label>Search</mat-label>
+      <input matInput [(ngModel)]="search" (keyup)="applyFilter()" placeholder="#owner = $me #unitCost > 5 #units lte 500"/>
+    </mat-form-field>
   <mat-table [dataSource]="planets" matSort>
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
@@ -11,7 +10,8 @@
       </mat-header-cell>
       <mat-cell *matCellDef="let planet">
         <mat-checkbox *ngIf="planet.owner === '0x1' || this.canSelectEnemyPlanets"
-          (change)="changeSelectOne(planet, $event)" [checked]="selection.includes(planet.id)"></mat-checkbox>
+                      (change)="changeSelectOne(planet, $event)"
+                      [checked]="selection.includes(planet.id)"></mat-checkbox>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef>{{selection.length}}</mat-footer-cell>
     </ng-container>
@@ -29,20 +29,20 @@
     </ng-container>
 
     <ng-container matColumnDef="currentUnits">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="currentUnits">Current Units</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="units">Current Units</mat-header-cell>
       <mat-cell *matCellDef="let planet">{{planet.getTotalUnits()}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="productionRate">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="productionRate">Unit Production Rate</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header="unitProductionRate">Unit Production Rate</mat-header-cell>
       <mat-cell *matCellDef="let planet">{{planet.unitProductionRate}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalUnitProductionRate()}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentOwner">
-      <mat-header-cell *matHeaderCellDef mat-sort-header="ownedBy">Current Owner</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.renderOwnership()}}</mat-cell> <!-- TODO: CurrentPlayer-->
+      <mat-header-cell *matHeaderCellDef mat-sort-header="owner">Current Owner</mat-header-cell>
+      <mat-cell *matCellDef="let planet">{{planet.renderOwnership()}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 

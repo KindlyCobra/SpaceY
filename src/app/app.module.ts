@@ -14,12 +14,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     PlanetTableViewComponent,
-    MoveUnitViewComponent
+    MoveUnitViewComponent,
   ],
   imports: [
     BrowserModule,
@@ -33,6 +35,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatInputModule,
     MatGridListModule,
     MatCheckboxModule,
+    MatSelectModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
