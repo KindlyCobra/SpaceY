@@ -41,17 +41,17 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   private updateTableData(value: Planet[]): void {
-      const currentFilter = this.planets?.filter;
+    const currentFilter = this.planets?.filter;
 
-      this.planets = new MatTableDataSource(value);
-      this.planets.sort = this.sort;
-      this.planets.paginator = this.paginator;
-      this.planets.filterPredicate = Planet.filterPredicate;
-      this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
+    this.planets = new MatTableDataSource(value);
+    this.planets.sort = this.sort;
+    this.planets.paginator = this.paginator;
+    this.planets.filterPredicate = Planet.filterPredicate;
+    this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
 
-      if (currentFilter) {
-        this.planets.filter = currentFilter;
-      }
+    if (currentFilter) {
+      this.planets.filter = currentFilter;
+    }
   }
 
   getSelected(): Planet[] {

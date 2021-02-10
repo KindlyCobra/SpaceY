@@ -1,0 +1,8 @@
+<div *ngIf="!metaMaskInitialized">
+    <p>Intialized MetaMask and select a Universe first!</p>
+</div>
+<div *ngIf="buyInitialPlanet">
+    <p>You are not yet active in this universe</p>
+    <p>Buying a initial planet costs {{costs}} gwei</p>
+    <button matButton (click)="onBuyInitialPlanetPressed()" class="full-width-field">Buy initial Planet</button>
+</div>

@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Planet } from './planet';
 import { EthereumService } from './ethereum.service';
+import { Router } from '@angular/router';
+import { timingSafeEqual } from 'crypto';
 
 @Injectable({
   providedIn: 'root'
@@ -14,17 +16,32 @@ export class PlanetService {
 
   private initialized = false;
 
+  public totalUnits: number = 0;
+  public totalProductionRate: number = 0;
+
   constructor(private ethereumService: EthereumService) {
     this.planetsSubject = new Subject();
-    void this.initialize();
   }
 
   onNewPlanets(): Observable<Planet[]> {
     return this.planetsSubject;
   }
 
+  private async updateTotalStats() {
+    const player = this.ethereumService.getPlayerAddress();
+    this.totalUnits = 0;
+    this.totalProductionRate = 0;
+    this.planets.filter(planet => planet.owner == player).forEach(planet => {
+      this.totalUnits += planet.getTotalUnits();
+      this.totalProductionRate += planet.unitProductionRate
+    });
+  }
+
   async initialize(): Promise<void> {
     if (this.initialized) {
+      return;
+    }
+    if (!this.ethereumService.isInitialized()) {
       return;
     }
     this.initialized = true;
@@ -46,6 +63,7 @@ export class PlanetService {
       console.info('Received block ' + blockNumber);
       this.currentBlockNumber = blockNumber;
       this.updateDynamicUnits();
+      this.updateTotalStats();
       this.notifyPlanets();
     });
 

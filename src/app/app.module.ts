@@ -13,6 +13,9 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common'
 
 import { AppRoutingModule } from './app-routing.module';
@@ -21,10 +24,14 @@ import { PlanetTableViewComponent } from './planet-table-view/planet-table-view.
 import { MoveUnitViewComponent } from './move-unit-view/move-unit-view.component';
 import { ChooseUniverseComponent } from './start-menu/choose-universe/choose-universe.component';
 import { StartMenuComponent } from './start-menu/start-menu.component';
+import { ConnectMetamaskComponent } from './start-menu/connect-metamask/connect-metamask.component';
+import { InitialPlanetComponent } from './start-menu/initial-planet/initial-planet.component';
+import { IngameComponent } from './ingame/ingame.component';
+
 
 const routes: Routes = [
   { path: "start", component: StartMenuComponent },
-  { path: "ingame", component: MoveUnitViewComponent },
+  { path: "ingame", component: IngameComponent },
   { path: "**", redirectTo: "start", pathMatch: "full" },
 ];
 
@@ -34,7 +41,10 @@ const routes: Routes = [
     PlanetTableViewComponent,
     MoveUnitViewComponent,
     ChooseUniverseComponent,
-    StartMenuComponent
+    StartMenuComponent,
+    ConnectMetamaskComponent,
+    InitialPlanetComponent,
+    IngameComponent
   ],
   imports: [
     CommonModule,
@@ -51,6 +61,9 @@ const routes: Routes = [
     MatCheckboxModule,
     MatSelectModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
+    MatToolbarModule,
+    ScrollingModule,
     RouterModule.forRoot(routes),
     FormsModule
   ],

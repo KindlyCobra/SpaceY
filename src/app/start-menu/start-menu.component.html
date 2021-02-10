@@ -1,10 +1,19 @@
-<p>Welcome to SpaceY</p>
+<div>
+    <mat-toolbar color="primary">
+        <span>Welcome to SpaceY!</span>
+    </mat-toolbar>
 
-<mat-tab-group [selectedIndex]="tabIndex">
-    <mat-tab label="Connect to MetaMask"></mat-tab>
-    <mat-tab label="Choose an Universe">
-        <app-choose-universe (universeSelected)="onUniverseSelected($event)"></app-choose-universe>
-    </mat-tab>
-    <mat-tab label="Validate Universe"></mat-tab>
-    <mat-tab label="Buy initial planet"></mat-tab>
-</mat-tab-group>
+    <mat-tab-group [selectedIndex]="tabIndex" class="padded">
+        <mat-tab label="Connect to MetaMask">
+            <start-menu-connect-metamask (connectedToMetaMask)="onConnectedToMetaMask()"></start-menu-connect-metamask>
+        </mat-tab>
+        <mat-tab label="Choose an Universe">
+            <start-menu-choose-universe (universeSelected)="onUniverseSelected($event)">
+            </start-menu-choose-universe>
+        </mat-tab>
+        <mat-tab label="Buy initial planet">
+            <start-menu-initial-planet #initialPlanetChild (boughtInitialPlanet)="onBoughtInitialPlanet()">
+            </start-menu-initial-planet>
+        </mat-tab>
+    </mat-tab-group>
+</div>

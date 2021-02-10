@@ -19,7 +19,7 @@ export class Universe {
 }
 
 @Component({
-  selector: 'app-choose-universe',
+  selector: 'start-menu-choose-universe',
   templateUrl: './choose-universe.component.html',
   styleUrls: ['./choose-universe.component.css']
 })

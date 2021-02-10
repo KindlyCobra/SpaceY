@@ -106,14 +106,18 @@ export class Planet {
   renderOwnership(): string {
     switch (this.owner) {
       case EthereumService.NULL_ADDRESS: {
-        return 'none';
+        return `none  <${this.renderOwnershipShort()}>`;
       }
       case Planet.ethereumService.getPlayerAddress(): {
-        return 'me';
+        return `me    <${this.renderOwnershipShort()}>`;
       }
       default: {
-        return this.owner;
+        return `enemy <${this.renderOwnershipShort()}>`;
       }
     }
+  }
+
+  renderOwnershipShort(): string {
+    return this.owner.substr(0, 6) + "..." + this.owner.substr(this.owner.length - 4, 4);
   }
 }

@@ -16,16 +16,14 @@ export class EthereumService {
   private playerAddress: string;
 
   private contract: ethers.Contract;
-  private contractAddress: string;
 
-  private initialized = false;
+  private connectedToMetaMask: boolean = false;
+  private initializedContract: boolean = false;
 
-  async initialize(contractAddress: string): Promise<void> {
-    if (this.initialized) {
-      throw Error("EthereumService is already initialized @" + this.contractAddress);
+  async connectToMetaMask(): Promise<boolean> {
+    if (this.connectedToMetaMask) {
+      return true;
     }
-
-    this.contractAddress = contractAddress;
 
     await detectEthereumProvider({ mustBeMetaMask: true });
 
@@ -35,23 +33,39 @@ export class EthereumService {
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
     this.signer = this.provider.getSigner();
     this.playerAddress = await this.signer.getAddress();
+    this.connectedToMetaMask = true;
+    console.log(`Connected to metamask with account: ${this.playerAddress}`)
+    return true;
+  }
 
-    this.contract = new ethers.Contract(this.contractAddress, spaceYAbi.abi, this.provider).connect(this.signer);
+  async initializeContract(contractAddress: string): Promise<boolean> {
+    if (!this.connectToMetaMask) {
+      return false;
+    }
+    this.contract = new ethers.Contract(contractAddress, spaceYAbi.abi, this.provider).connect(this.signer);
 
-    console.info('Initialized EthereumSerivce for account: ' + this.playerAddress);
-    this.initialized = true;
+    console.info('Initialized EthereumSerivce for contract at ' + contractAddress);
+    this.initializedContract = true;
+    return true;
   }
 
   private initializeGuard(): void {
-    if (!this.initialized) {
+    if (!this.initializedContract) {
       throw new Error('Trying to access non initialized ethereum service ...');
     }
+    if (!this.connectedToMetaMask) {
+      throw new Error('Trying to access ethereum service which in unconnected to metamask ...');
+    }
+  }
+
+  isInitialized(): boolean {
+    return this.initializedContract && this.connectedToMetaMask;
   }
 
   async isActivePlayer(): Promise<boolean> {
     this.initializeGuard();
     const result = await this.contract.startPlanets(this.getPlayerAddress());
-    return result.conquerBlockNumber.toNumber() === 0;
+    return result.conquerBlockNumber.toNumber() !== 0;
   }
 
   getContract(): ethers.Contract {

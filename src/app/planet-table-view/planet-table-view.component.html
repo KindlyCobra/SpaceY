@@ -1,17 +1,16 @@
-<div>
-  <mat-form-field>
+<div class="padded">
+  <mat-form-field style="width: 100%;">
     <mat-label>Filter</mat-label>
     <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" />
   </mat-form-field>
-
-  <mat-table [dataSource]="planets" matSort>
+  <mat-table [dataSource]="planets" matSort style="overflow: auto; height: 75vh;">
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
         <mat-checkbox (change)="changeSelectAll($event)"></mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let planet">
-        <mat-checkbox *ngIf="planet.owner === '0x1' || this.canSelectEnemyPlanets"
-          (change)="changeSelectOne(planet, $event)" [checked]="selection.includes(planet.id)"></mat-checkbox>
+        <mat-checkbox (change)="changeSelectOne(planet, $event)" [checked]="selection.includes(planet.id)">
+        </mat-checkbox>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef>{{selection.length}}</mat-footer-cell>
     </ng-container>
@@ -46,8 +45,8 @@
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 
-    <mat-header-row *matHeaderRowDef="displayedColumns" style="position: sticky"></mat-header-row>
-    <mat-footer-row *matFooterRowDef="displayedColumns" style="position: sticky"></mat-footer-row>
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
     <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
   </mat-table>
   <mat-paginator></mat-paginator>

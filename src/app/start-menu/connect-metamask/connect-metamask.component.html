@@ -1,0 +1,7 @@
+<div *ngIf="!connected">
+    <p>Please accept the connection thought MetaMask</p>
+    <mat-progress-spinner mode="indeterminate"> </mat-progress-spinner>
+</div>
+<div *ngIf="connected">
+    <p>You are connected to MetaMask</p>
+</div>
