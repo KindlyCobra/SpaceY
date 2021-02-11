@@ -15,7 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatButton, MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common'
 
 import { AppRoutingModule } from './app-routing.module';
@@ -63,7 +63,7 @@ const routes: Routes = [
     MatTabsModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
-    ScrollingModule,
+    MatButtonModule,
     RouterModule.forRoot(routes),
     FormsModule
   ],

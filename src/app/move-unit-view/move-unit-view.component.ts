@@ -9,22 +9,30 @@ import { PlanetTableViewComponent } from '../planet-table-view/planet-table-view
   templateUrl: './move-unit-view.component.html',
   styleUrls: ['./move-unit-view.component.css']
 })
-export class MoveUnitViewComponent implements OnInit {
+export class MoveUnitViewComponent {
 
   selectedFrom: Planet[] = [];
-  selectedTo: Planet[] = [];
+  selectedTo?: Planet;
+  somethingSelectedTo: boolean;
 
+  totalSelectedUnits: number = 0;
+  isMove: boolean = true;
 
   constructor(private ethereumService: EthereumService) {
   }
 
-  ngOnInit(): void { }
-
   onSelectionChanged(where: 'left' | 'right', selection: Planet[]): void {
     if (where === 'left') {
       this.selectedFrom = selection;
+      this.totalSelectedUnits = this.unitsToMove();
     } else {
-      this.selectedTo = selection;
+      this.somethingSelectedTo = selection.length > 0;
+      if (selection.length > 0) {
+        this.selectedTo = selection[0];
+        this.isMove = this.selectedTo.owner == this.ethereumService.getPlayerAddress();
+      } else {
+        this.selectedTo = undefined;
+      }
     }
   }
 
@@ -40,17 +48,21 @@ export class MoveUnitViewComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedTo || this.selectedTo.length === 0) {
+    if (typeof this.selectedTo === undefined) {
       console.log('Select Planet to move to from right side!');
       return;
     }
 
+    if (this.selectedTo.owner != EthereumService.NULL_ADDRESS && this.selectedTo.owner != this.ethereumService.getPlayerAddress()) {
+      console.error("SelectedTo has either to be a empty or own planet");
+      return
+    }
+
     const contract = this.ethereumService.getContract();
 
-    const isConquer = this.selectedTo[0].owner !== this.ethereumService.getPlayerAddress();
-    const toPlanet = this.selectedTo[0];
+    const toPlanet = this.selectedTo;
 
-    if (!isConquer) {
+    if (this.isMove) {
       for (const planet of from) {
         console.info(`Moving ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${toPlanet.renderPlanetId()}`);
         contract.moveUnits(planet.id, toPlanet.id, planet.getTotalUnits());
@@ -59,7 +71,10 @@ export class MoveUnitViewComponent implements OnInit {
       const totalUnits = from.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
       const fromUnitAmounts = from.map(planet => planet.getTotalUnits());
       const fromPlanetIds = from.map(planet => planet.id);
-      console.assert(totalUnits >= toPlanet.unitCost);
+      if (totalUnits < toPlanet.unitCost) {
+        console.error(`The total selected amount ${totalUnits} is less then the costs ${toPlanet.unitCost}`);
+        return;
+      }
       console.info(`Conquering ${toPlanet.renderPlanetId()} from [${fromPlanetIds}] with [${fromUnitAmounts}] => ${totalUnits} units`);
       await contract.conquerPlanet(fromPlanetIds, toPlanet.id, fromUnitAmounts);
     }

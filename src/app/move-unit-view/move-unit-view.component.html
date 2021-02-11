@@ -1,6 +1,12 @@
-<mat-toolbar style="height: 4vh;">
-    <span>Units: / block</span>
+<mat-toolbar style="height: 5vh;">
+    <span>Selected: {{totalSelectedUnits}}</span>
     <span style="flex: 1 1 auto;"></span>
+    <div *ngIf="somethingSelectedTo">
+        <button mat-flat-button color="primary" *ngIf="isMove" (click)="moveUnits()">Move to
+            {{selectedTo.renderPlanetId()}}</button>
+        <button mat-flat-button color="primary" *ngIf="!isMove" (click)="moveUnits()">Conquer
+            {{selectedTo.renderPlanetId()}}</button>
+    </div>
 </mat-toolbar>
 
 <app-planet-table-view style="float: left; width: 50%; display: inline-block" canSelect=true canOnlySelecteOwn="true"

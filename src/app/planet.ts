@@ -118,6 +118,6 @@ export class Planet {
   }
 
   renderOwnershipShort(): string {
-    return this.owner.substr(0, 6) + "..." + this.owner.substr(this.owner.length - 4, 4);
+    return this.owner.substr(0, 6) + "..." + this.owner.substr(this.owner.length - 3, 3);
   }
 }
