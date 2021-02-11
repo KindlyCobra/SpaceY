@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Planet } from './planet';
 import { EthereumService } from './ethereum.service';
-import {ConsoleService} from './console.service';
+import { ConsoleService } from './console.service';
 
 @Injectable({
   providedIn: 'root'
@@ -98,25 +98,34 @@ export class PlanetService {
     this.planets = new Array(numPlanets);
     console.info('Starting planet initialisation for ' + numPlanets + ' planets');
     this.consoleService.addEntry('Starting planet initialisation for ' + numPlanets + ' planets');
-    const promises: Promise<any>[] = new Array(numPlanets);
 
     for (let i = 0; i <= numPlanets; i++) {
-      promises[i] = contract.getPlanet(i).then(async result => {
-        const planet = new Planet(i, numPlanets);
-        if (result.owner === this.ethereumService.getPlayerAddress()) {
-          await this.syncRealPlanetStats(planet);
-        }
-        if (result.owner !== EthereumService.NULL_ADDRESS) {
-          planet.conquer(result.owner, result.units.toNumber(), result.conquerBlockNumber);
-        }
-        planet.updateDynamicUnits(this.currentBlockNumber);
-        this.planets[i] = planet;
-      });
+      const planet = new Planet(i, numPlanets);
+      this.planets[i] = planet;
     }
+
+    let conqueredPlanets: Array<number> = await contract.getConqueredPlanets();
+    let promises = conqueredPlanets.map(planetId => this.syncInitialPlanetData(planetId));
+    promises.push(this.syncInitialPlanetData(numPlanets));
+
     await Promise.all(promises);
     console.warn('All planets initialized');
     this.consoleService.addEntry('All planets initialized');
     this.notifyPlanets();
+  }
+
+  private async syncInitialPlanetData(planetId: number): Promise<void> {
+    console.info(`Syncing initial value for ${planetId}`);
+    const contract = this.ethereumService.getContract();
+    let result = await contract.getPlanet(planetId);
+    let planet = this.planets[planetId];
+    if (result.owner === this.ethereumService.getPlayerAddress()) {
+      await this.syncRealPlanetStats(planet);
+    }
+    if (result.owner !== EthereumService.NULL_ADDRESS) {
+      planet.conquer(result.owner, result.units.toNumber(), result.conquerBlockNumber);
+    }
+    planet.updateDynamicUnits(this.currentBlockNumber);
   }
 
   private async syncRealPlanetStats(planet: Planet): Promise<void> {
