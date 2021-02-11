@@ -28,6 +28,7 @@ import { StartMenuComponent } from './start-menu/start-menu.component';
 import { ConnectMetamaskComponent } from './start-menu/connect-metamask/connect-metamask.component';
 import { InitialPlanetComponent } from './start-menu/initial-planet/initial-planet.component';
 import { IngameComponent } from './ingame/ingame.component';
+import { ConsoleViewComponent } from './console-view/console-view.component';
 
 
 const routes: Routes = [
@@ -45,7 +46,8 @@ const routes: Routes = [
     StartMenuComponent,
     ConnectMetamaskComponent,
     InitialPlanetComponent,
-    IngameComponent
+    IngameComponent,
+    ConsoleViewComponent
   ],
   imports: [
     CommonModule,

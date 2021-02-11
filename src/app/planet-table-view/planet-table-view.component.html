@@ -3,7 +3,7 @@
     <mat-label>Filter</mat-label>
     <input matInput [(ngModel)]="search" (keyup)="applyFilter()" placeholder="#owner = $me #unitCost > 5 #units lte 500"/>
   </mat-form-field>
-  <mat-table [dataSource]="planets" matSort style="overflow: auto; height: 75vh;">
+  <mat-table [dataSource]="planets" matSort style="overflow: auto; height: 63vh;">
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
         <mat-checkbox *ngIf="!singleSelect" (change)="$event ? changeSelectAll($event) : null"></mat-checkbox>

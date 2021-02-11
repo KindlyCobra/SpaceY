@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Planet } from './planet';
 import { EthereumService } from './ethereum.service';
-import { Router } from '@angular/router';
-import { timingSafeEqual } from 'crypto';
+import {ConsoleService} from './console.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +18,7 @@ export class PlanetService {
   public totalUnits: number = 0;
   public totalProductionRate: number = 0;
 
-  constructor(private ethereumService: EthereumService) {
+  constructor(private ethereumService: EthereumService, private consoleService: ConsoleService) {
     this.planetsSubject = new Subject();
   }
 
@@ -77,12 +76,14 @@ export class PlanetService {
     contract.on('UnitsSendToConquer', (fromPlanetId, toPlanetId, player, units) => {
       const fromPlanet = this.planets[fromPlanetId];
       console.info(`Player ${player} sended ${units} units from planet ${fromPlanet.renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()} to conquer it`);
+      this.consoleService.addEntry(`Player ${player} sended ${units} units from planet ${fromPlanet.renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()} to conquer it`);
       fromPlanet.moveUnits(-units.toNumber());
       this.fetchAndPrintSyncDrift(fromPlanetId);
     });
 
     contract.on('UnitsMoved', (fromPlanetId, toPlanetId, player, units) => {
       console.info(`Player ${player} moved ${units} units from planet ${this.planets[fromPlanetId].renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()}`);
+      this.consoleService.addEntry(`Player ${player} moved ${units} units from planet ${this.planets[fromPlanetId].renderPlanetId()} to ${this.planets[toPlanetId].renderPlanetId()}`);
       this.planets[fromPlanetId].moveUnits(-units.toNumber());
       this.planets[toPlanetId].moveUnits(units.toNumber());
       this.fetchAndPrintSyncDrift(fromPlanetId);
@@ -96,7 +97,7 @@ export class PlanetService {
 
     this.planets = new Array(numPlanets);
     console.info('Starting planet initialisation for ' + numPlanets + ' planets');
-
+    this.consoleService.addEntry('Starting planet initialisation for ' + numPlanets + ' planets');
     const promises: Promise<any>[] = new Array(numPlanets);
 
     for (let i = 0; i <= numPlanets; i++) {
@@ -114,7 +115,7 @@ export class PlanetService {
     }
     await Promise.all(promises);
     console.warn('All planets initialized');
-
+    this.consoleService.addEntry('All planets initialized');
     this.notifyPlanets();
   }
 
@@ -122,6 +123,7 @@ export class PlanetService {
     if (!planet.isSynced) {
       const realStats = await this.ethereumService.getContract().getPlanetStats(planet.id);
       console.info(`Synced real values for planet ${planet.renderPlanetId()}`);
+      this.consoleService.addEntry(`Synced real values for planet ${planet.renderPlanetId()}`);
       planet.syncRealStats(realStats.unitsCost.toNumber(), realStats.unitsCreationRate.toNumber());
     }
   }
@@ -130,6 +132,7 @@ export class PlanetService {
     const result = await this.ethereumService.getContract().getUnitsOnPlanet(planetId);
     const planet = this.planets[planetId];
     console.info(`Received planet update for ${planet.renderPlanetId()}, is: ${planet.getTotalUnits()} should: ${result.toNumber()}`);
+    this.consoleService.addEntry(`Received planet update for ${planet.renderPlanetId()}, is: ${planet.getTotalUnits()} should: ${result.toNumber()}`);
   }
 
   private updateDynamicUnits(): void {
@@ -140,6 +143,7 @@ export class PlanetService {
 
   private notifyPlanets(): void {
     console.info('Updating planets');
+    this.consoleService.addEntry('Updating planets');
     this.planetsSubject.next(Array.from(this.planets));
   }
 
