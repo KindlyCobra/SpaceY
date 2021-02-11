@@ -171,4 +171,8 @@ export class Planet {
       }
     }
   }
+
+  isPlayerOwned(): boolean {
+    return this.owner === Planet.ethereumService.getPlayerAddress();
+  }
 }

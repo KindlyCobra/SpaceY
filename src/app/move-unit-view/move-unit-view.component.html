@@ -1,4 +1,4 @@
 <mat-label>Units to transfer: {{this.unitsToMove()}}</mat-label>
 <button mat-button (click)="moveUnits()">Move Units</button>
-<app-planet-table-view style="float: left; width: 50%; display: inline-block" canSelect=true canSelectEnemyPlanets="false" (selectionChanged)="onSelectionChanged('left', $event)"></app-planet-table-view>
-<app-planet-table-view style="float: right; width: 50%; display: inline-block" canSelect=true canSelectEnemyPlanets="true" (selectionChanged)="onSelectionChanged('right', $event)"></app-planet-table-view>
+<app-planet-table-view style="float: left; width: 50%; display: inline-block" [canSelect]="true" [canSelectEnemyPlanets]="false" (selectionChanged)="onSelectionChanged('left', $event)"></app-planet-table-view>
+<app-planet-table-view style="float: right; width: 50%; display: inline-block" [canSelect]="true" [singleSelect]="true" [canSelectEnemyPlanets]="true" (selectionChanged)="onSelectionChanged('right', $event)"></app-planet-table-view>

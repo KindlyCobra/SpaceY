@@ -6,14 +6,15 @@
   <mat-table [dataSource]="planets" matSort>
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
-        <mat-checkbox (change)="changeSelectAll($event)"></mat-checkbox>
+        <mat-checkbox [disabled]="singleSelect" (change)="$event ? changeSelectAll($event) : null"></mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let planet">
-        <mat-checkbox *ngIf="planet.owner === '0x1' || this.canSelectEnemyPlanets"
-                      (change)="changeSelectOne(planet, $event)"
-                      [checked]="selection.includes(planet.id)"></mat-checkbox>
+        <mat-checkbox *ngIf="canSelectPlanet(planet)"
+                      (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(planet) : null"
+                      [checked]="selection.hasValue() && selection.isSelected(planet)"></mat-checkbox>
       </mat-cell>
-      <mat-footer-cell *matFooterCellDef>{{selection.length}}</mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef>{{selection.selected.length}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="address">
@@ -48,7 +49,7 @@
 
     <mat-header-row *matHeaderRowDef="displayedColumns" style="position: sticky"></mat-header-row>
     <mat-footer-row *matFooterRowDef="displayedColumns" style="position: sticky"></mat-footer-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="changeSelectOne()"></mat-row>
   </mat-table>
   <mat-paginator></mat-paginator>
 </div>

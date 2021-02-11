@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Transaction } from 'ethers';
 import { EthereumService } from '../ethereum.service';
 import { Planet } from '../planet';
-import { PlanetTableViewComponent } from '../planet-table-view/planet-table-view.component';
+import {SelectionChange} from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-move-unit-view',
@@ -22,11 +21,11 @@ export class MoveUnitViewComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  onSelectionChanged(where: 'left' | 'right', selection: Planet[]): void {
+  onSelectionChanged(where: 'left' | 'right', selection: SelectionChange<Planet>): void {
     if (where === 'left') {
-      this.selectedFrom = selection;
+      this.selectedFrom = selection.source.selected;
     } else {
-      this.selectedTo = selection;
+      this.selectedTo = selection.source.selected;
     }
   }
 

@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import {SelectionChange, SelectionModel} from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-planet-table-view',
@@ -15,7 +16,8 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   @Input() canSelectEnemyPlanets;
   @Input() canSelect;
-  @Output() selectionChanged = new EventEmitter<Planet[]>();
+  @Input() singleSelect;
+  @Output() selectionChanged = new EventEmitter<SelectionChange<Planet>>();
   displayedColumns: string[];
 
   constructor(private planetService: PlanetService) { }
@@ -24,13 +26,23 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
 
   planets: MatTableDataSource<Planet>;
   myPlanets: Planet[];
-  selection: number[] = [];
+  selection: SelectionModel<Planet>;
   selectedOp: string;
   currentUnitFilter: string;
   search: string;
 
   async ngOnInit(): Promise<void> {
+    this.selection = new SelectionModel<Planet>(!this.singleSelect, [], true);
+    this.selection.changed.subscribe(this);
     this.displayedColumns = [... this.canSelect ? ['select'] : [], 'address', 'cost', 'currentUnits', 'productionRate', 'currentOwner'];
+  }
+
+  canSelectPlanet(planet: Planet): boolean {
+    return this.canSelectEnemyPlanets || planet.isPlayerOwned();
+  }
+
+  next(value: SelectionChange<Planet>): void {
+    this.selectionChanged.emit(value);
   }
 
   ngAfterViewInit(): void {
@@ -53,7 +65,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   getSelected(): Planet[] {
-    return this.planets.data.filter(planet => this.selection?.includes(planet.id));
+    return this.selection.selected;
   }
 
   getTotalOwnedUnits(): number {
@@ -72,23 +84,10 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
     this.planets.filter = this.search?.trim();
   }
 
-  changeSelectAll(change: MatCheckboxChange): void {
-    if (change.checked) {
-      this.selection = this.planets.filteredData.map(planet => planet.id);
-    } else {
-      this.selection = [];
+  changeSelectAll(event: MatCheckboxChange): void {
+    this.selection.clear();
+    if (event.checked) {
+      this.selection.select(...this.planets.filteredData);
     }
-
-    this.selectionChanged.emit(this.getSelected());
-  }
-
-  changeSelectOne(planet: Planet, change: MatCheckboxChange): void {
-    if (change.checked) {
-      this.selection.push(planet.id);
-    } else {
-      this.selection = this.selection.filter(id => id !== planet.id);
-    }
-
-    this.selectionChanged.emit(this.getSelected());
   }
 }
