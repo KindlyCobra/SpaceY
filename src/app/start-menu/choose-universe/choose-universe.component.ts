@@ -26,9 +26,7 @@ export class Universe {
 export class ChooseUniverseComponent {
 
   readonly universes: Universe[] = [
-    new Universe("Main", "Görli", '0xF633F3fBBf679cde9cdaC74Ec94c16D6F8DaB353'),
-    new Universe("Test1", "Görli", '0xF633F3fBBf679cde9cdaC74Ec94c16D6F8DaB353'),
-    new Universe("Test2", "Görli", '0xF633F3fBBf679cde9cdaC74Ec94c16D6F8DaB353'),
+    new Universe("Main <Size: 10.000, Fee: 1000>", "Görli", '0x362fad098c5f2bc0e445c1fec368068f5164c4e5'),
   ]
 
   isCustom: boolean = false;

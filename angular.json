@@ -23,8 +23,8 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/assets/favicon.png"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
