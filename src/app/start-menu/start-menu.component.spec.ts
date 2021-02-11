@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PlanetListViewComponent } from './planet-list-view.component';
+import { StartMenuComponent } from './start-menu.component';
 
-describe('PlanetListViewComponent', () => {
-  let component: PlanetListViewComponent;
-  let fixture: ComponentFixture<PlanetListViewComponent>;
+describe('StartMenuComponent', () => {
+  let component: StartMenuComponent;
+  let fixture: ComponentFixture<StartMenuComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PlanetListViewComponent ]
+      declarations: [ StartMenuComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PlanetListViewComponent);
+    fixture = TestBed.createComponent(StartMenuComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

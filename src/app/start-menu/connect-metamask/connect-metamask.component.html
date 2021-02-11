@@ -1,0 +1,20 @@
+<div *ngIf="!connected">
+    <p>
+        You are not yet connected to MetaMask.<br>
+        In order to play this game you have to install the BrowserPlugin MetaMask.<br>
+        Download it and create an account. You don't have to save any passphrase as long as you only use the account on
+        the testnet.<br>
+        So NEVER send real Mainnet Ethereum to your account unless you saved the passphrase!<br>
+        <br>
+        Currently the game is only running the Görli Testnet, so make sure its selected at the top of MetaMask.<br>
+        Afterwards you will have to get some test Ethers. Testnets have services called faucets where you can get some
+        free test Ethers.<br>
+        <a href="https://goerli-faucet.slock.it/">Click me to receive tests Ethers</a>
+        <br><br>
+        Now allow this website to access MetaMask, you might have to reload this site after installing MetaMask.
+    </p>
+    <mat-progress-spinner mode="indeterminate"> </mat-progress-spinner>
+</div>
+<div *ngIf="connected">
+    <p>You are connected to MetaMask</p>
+</div>

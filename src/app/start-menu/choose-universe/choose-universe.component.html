@@ -1,0 +1,38 @@
+<mat-accordion>
+    <mat-expansion-panel (opened)="onOfficialUniverseSelected()">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Official Universes
+            </mat-panel-title>
+            <mat-panel-description *ngIf="!isCustom">
+                {{selectedUniverse.address}}
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-form-field class="full-width-field">
+            <mat-label>Universe</mat-label>
+            <mat-select [(value)]="selectedUniverse">
+                <mat-option *ngFor="let universe of universes" [value]="universe">
+                    {{universe.render()}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </mat-expansion-panel>
+    <mat-expansion-panel (opened)="onCustomUniverseSelected()">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Custom Universe
+            </mat-panel-title>
+            <mat-panel-description *ngIf="isCustom">
+                {{customUniverseAddress}}
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-form-field class="full-width-field">
+            <input matInput placeholder="Contract address" (keyup)="onCustomAddressChanged($event)">
+        </mat-form-field>
+    </mat-expansion-panel>
+
+</mat-accordion>
+
+<button mat-flat-button color="accent" (click)="onSelectUniverseClick()" class="full-width-field" style="margin-top: 10px">Select Universe</button>
