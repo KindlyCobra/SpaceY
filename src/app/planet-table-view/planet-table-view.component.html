@@ -1,12 +1,12 @@
-<div>
-    <mat-form-field style="width: 95%">
-      <mat-label>Search</mat-label>
-      <input matInput [(ngModel)]="search" (keyup)="applyFilter()" placeholder="#owner = $me #unitCost > 5 #units lte 500"/>
-    </mat-form-field>
-  <mat-table [dataSource]="planets" matSort>
+<div class="padded">
+  <mat-form-field style="width: 100%;">
+    <mat-label>Filter</mat-label>
+    <input matInput [(ngModel)]="search" (keyup)="applyFilter()" placeholder="#owner = $me #unitCost > 5 #units lte 500"/>
+  </mat-form-field>
+  <mat-table [dataSource]="planets" matSort style="overflow: auto; height: 75vh;">
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
-        <mat-checkbox [disabled]="singleSelect" (change)="$event ? changeSelectAll($event) : null"></mat-checkbox>
+        <mat-checkbox *ngIf="!singleSelect" (change)="$event ? changeSelectAll($event) : null"></mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let planet">
         <mat-checkbox *ngIf="canSelectPlanet(planet)"
@@ -19,37 +19,37 @@
 
     <ng-container matColumnDef="address">
       <mat-header-cell *matHeaderCellDef>Address</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.renderPlanetId()}}</mat-cell>
+      <mat-cell *matCellDef="let planet" (click)="toggleSelection(planet)">{{planet.renderPlanetId()}}</mat-cell>
       <mat-footer-cell *matFooterCellDef><b>Total: {{myPlanets?.length}}</b></mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="cost">
       <mat-header-cell *matHeaderCellDef mat-sort-header="unitCost">Unit Cost</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.unitCost}}</mat-cell>
+      <mat-cell *matCellDef="let planet" (click)="toggleSelection(planet)">{{planet.unitCost}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentUnits">
       <mat-header-cell *matHeaderCellDef mat-sort-header="units">Current Units</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.getTotalUnits()}}</mat-cell>
-      <mat-footer-cell *matFooterCellDef>{{getTotalOwnedUnits()}}</mat-footer-cell>
+      <mat-cell *matCellDef="let planet" (click)="toggleSelection(planet)">{{planet.getTotalUnits()}}</mat-cell>
+      <mat-footer-cell *matFooterCellDef>{{getTotalUnits()}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="productionRate">
       <mat-header-cell *matHeaderCellDef mat-sort-header="unitProductionRate">Unit Production Rate</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.unitProductionRate}}</mat-cell>
+      <mat-cell *matCellDef="let planet" (click)="toggleSelection(planet)">{{planet.unitProductionRate}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>{{getTotalUnitProductionRate()}}</mat-footer-cell>
     </ng-container>
 
     <ng-container matColumnDef="currentOwner">
       <mat-header-cell *matHeaderCellDef mat-sort-header="owner">Current Owner</mat-header-cell>
-      <mat-cell *matCellDef="let planet">{{planet.renderOwnership()}}</mat-cell>
+      <mat-cell *matCellDef="let planet" (click)="copyToClipboard(planet.owner)">{{planet.renderOwnership()}}</mat-cell>
       <mat-footer-cell *matFooterCellDef>-</mat-footer-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="displayedColumns" style="position: sticky"></mat-header-row>
     <mat-footer-row *matFooterRowDef="displayedColumns" style="position: sticky"></mat-footer-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="changeSelectOne()"></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
   </mat-table>
   <mat-paginator></mat-paginator>
 </div>

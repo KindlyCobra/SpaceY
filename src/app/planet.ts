@@ -1,6 +1,7 @@
-import {EthereumService} from './ethereum.service';
+import { EthereumService } from './ethereum.service';
 
 export class Planet {
+  public static ethereumService: EthereumService;
 
   public constructor(planetId: number, universeSize: number) {
     const magnitude = Math.pow(universeSize - planetId, 2);
@@ -13,7 +14,6 @@ export class Planet {
     this.staticUnits = 0;
     this.dynamicUnits = 0;
   }
-  public static ethereumService: EthereumService;
 
   readonly id: number;
   unitCost: number;
@@ -161,15 +161,19 @@ export class Planet {
   renderOwnership(): string {
     switch (this.owner) {
       case EthereumService.NULL_ADDRESS: {
-        return 'none';
+        return `none  <${this.renderOwnershipShort()}>`;
       }
       case Planet.ethereumService.getPlayerAddress(): {
-        return 'me';
+        return `me    <${this.renderOwnershipShort()}>`;
       }
       default: {
-        return this.owner;
+        return `enemy <${this.renderOwnershipShort()}>`;
       }
     }
+  }
+
+  renderOwnershipShort(): string {
+    return this.owner.substr(0, 6) + '...' + this.owner.substr(this.owner.length - 3, 3);
   }
 
   isPlayerOwned(): boolean {

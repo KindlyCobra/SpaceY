@@ -1,4 +1,15 @@
-<mat-label>Units to transfer: {{this.unitsToMove()}}</mat-label>
-<button mat-button (click)="moveUnits()">Move Units</button>
-<app-planet-table-view style="float: left; width: 50%; display: inline-block" [canSelect]="true" [canSelectEnemyPlanets]="false" (selectionChanged)="onSelectionChanged('left', $event)"></app-planet-table-view>
-<app-planet-table-view style="float: right; width: 50%; display: inline-block" [canSelect]="true" [singleSelect]="true" [canSelectEnemyPlanets]="true" (selectionChanged)="onSelectionChanged('right', $event)"></app-planet-table-view>
+<mat-toolbar style="height: 5vh;">
+    <span>Selected: {{unitsToMove()}}</span>
+    <span style="flex: 1 1 auto;"></span>
+    <div *ngIf="somethingSelectedTo">
+        <button mat-flat-button color="primary" *ngIf="isMove" (click)="moveUnits()">Move to
+            {{selectedTo.renderPlanetId()}}</button>
+        <button mat-flat-button color="primary" *ngIf="!isMove" (click)="moveUnits()">Conquer
+            {{selectedTo.renderPlanetId()}}</button>
+    </div>
+</mat-toolbar>
+
+<app-planet-table-view style="float: left; width: 50%; display: inline-block" [canSelect]="true" [canOnlySelectOwn]="true"
+    [singleSelect]="false" (selectionChanged)="onSelectionChanged('left', $event)"></app-planet-table-view>
+<app-planet-table-view style="float: right; width: 50%; display: inline-block" [canSelect]="true" [canOnlySelectOwn]="false"
+    [singleSelect]="true" (selectionChanged)="onSelectionChanged('right', $event)"></app-planet-table-view>

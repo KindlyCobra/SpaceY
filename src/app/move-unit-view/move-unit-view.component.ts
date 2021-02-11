@@ -1,31 +1,34 @@
 import { Component, OnInit } from '@angular/core';
 import { EthereumService } from '../ethereum.service';
 import { Planet } from '../planet';
-import {SelectionChange} from '@angular/cdk/collections';
+import { SelectionChange } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-move-unit-view',
   templateUrl: './move-unit-view.component.html',
   styleUrls: ['./move-unit-view.component.css']
 })
-export class MoveUnitViewComponent implements OnInit {
+export class MoveUnitViewComponent {
 
   selectedFrom: Planet[] = [];
-  selectedTo: Planet[] = [];
+  selectedTo?: Planet;
+  somethingSelectedTo: boolean;
 
-  ethereumService: EthereumService;
+  isMove: boolean = true;
 
-  constructor(ethereumService: EthereumService) {
-    this.ethereumService = ethereumService;
-  }
-
-  ngOnInit(): void { }
+  constructor(private ethereumService: EthereumService) {}
 
   onSelectionChanged(where: 'left' | 'right', selection: SelectionChange<Planet>): void {
     if (where === 'left') {
       this.selectedFrom = selection.source.selected;
     } else {
-      this.selectedTo = selection.source.selected;
+      this.somethingSelectedTo = selection.source.selected.length > 0;
+      if (selection.source.selected.length > 0) {
+        this.selectedTo = selection.source.selected[0];
+        this.isMove = this.selectedTo.owner === this.ethereumService.getPlayerAddress();
+      } else {
+        this.selectedTo = undefined;
+      }
     }
   }
 
@@ -41,17 +44,21 @@ export class MoveUnitViewComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedTo || this.selectedTo.length === 0) {
+    if (typeof this.selectedTo === undefined) {
       console.log('Select Planet to move to from right side!');
       return;
     }
 
+    if (this.selectedTo.owner !== EthereumService.NULL_ADDRESS && this.selectedTo.owner !== this.ethereumService.getPlayerAddress()) {
+      console.error('SelectedTo has either to be a empty or own planet');
+      return
+    }
+
     const contract = this.ethereumService.getContract();
 
-    const isConquer = this.selectedTo[0].owner !== this.ethereumService.getPlayerAddress();
-    const toPlanet = this.selectedTo[0];
+    const toPlanet = this.selectedTo;
 
-    if (!isConquer) {
+    if (this.isMove) {
       for (const planet of from) {
         console.info(`Moving ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${toPlanet.renderPlanetId()}`);
         contract.moveUnits(planet.id, toPlanet.id, planet.getTotalUnits());
@@ -60,7 +67,10 @@ export class MoveUnitViewComponent implements OnInit {
       const totalUnits = from.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
       const fromUnitAmounts = from.map(planet => planet.getTotalUnits());
       const fromPlanetIds = from.map(planet => planet.id);
-      console.assert(totalUnits >= toPlanet.unitCost);
+      if (totalUnits < toPlanet.unitCost) {
+        console.error(`The total selected amount ${totalUnits} is less then the costs ${toPlanet.unitCost}`);
+        return;
+      }
       console.info(`Conquering ${toPlanet.renderPlanetId()} from [${fromPlanetIds}] with [${fromUnitAmounts}] => ${totalUnits} units`);
       await contract.conquerPlanet(fromPlanetIds, toPlanet.id, fromUnitAmounts);
     }

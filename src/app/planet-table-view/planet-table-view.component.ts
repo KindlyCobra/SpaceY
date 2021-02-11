@@ -5,7 +5,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import {SelectionChange, SelectionModel} from '@angular/cdk/collections';
+import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-planet-table-view',
@@ -14,13 +15,13 @@ import {SelectionChange, SelectionModel} from '@angular/cdk/collections';
 })
 
 export class PlanetTableViewComponent implements AfterViewInit, OnInit {
-  @Input() canSelectEnemyPlanets;
+  @Input() canOnlySelectOwn;
   @Input() canSelect;
   @Input() singleSelect;
   @Output() selectionChanged = new EventEmitter<SelectionChange<Planet>>();
   displayedColumns: string[];
 
-  constructor(private planetService: PlanetService) { }
+  constructor(private planetService: PlanetService, private clipboard: Clipboard) { }
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -38,7 +39,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
   }
 
   canSelectPlanet(planet: Planet): boolean {
-    return this.canSelectEnemyPlanets || planet.isPlayerOwned();
+    return planet.isPlayerOwned() || !this.canOnlySelectOwn;
   }
 
   next(value: SelectionChange<Planet>): void {
@@ -61,6 +62,7 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
       this.planets.paginator = this.paginator;
       this.planets.filterPredicate = Planet.filterPredicate;
       this.myPlanets = this.planets.data.filter(planet => planet.owner === '0x1');
+
       this.applyFilter();
   }
 
@@ -68,12 +70,18 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
     return this.selection.selected;
   }
 
-  getTotalOwnedUnits(): number {
-    return this.myPlanets?.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
+  getTotalUnits(): number {
+    return this.planets?.filteredData.reduce((acc, planet) => acc + planet.getTotalUnits(), 0);
   }
 
   getTotalUnitProductionRate(): number {
     return this.planets?.filteredData.reduce((acc, planet) => acc + planet.unitProductionRate, 0);
+  }
+
+  toggleSelection(planet: Planet): void {
+    if (this.canSelectPlanet(planet)) {
+      this.selection.toggle(planet);
+    }
   }
 
   applyFilter(): void {
@@ -84,10 +92,14 @@ export class PlanetTableViewComponent implements AfterViewInit, OnInit {
     this.planets.filter = this.search?.trim();
   }
 
+  copyToClipboard(text: string): void {
+    this.clipboard.copy(text);
+  }
+
   changeSelectAll(event: MatCheckboxChange): void {
     this.selection.clear();
     if (event.checked) {
-      this.selection.select(...this.planets.filteredData);
+      this.selection.select(...this.planets.filteredData.filter(this.canSelectPlanet));
     }
   }
 }
