@@ -8,7 +8,7 @@ export class Planet {
     this.id = planetId;
 
     this.unitCost = magnitude;
-    const productionRate = Math.ceil(magnitude / 100.0);
+    const productionRate = Math.ceil(magnitude / 250.0);
     this.unitProductionRate = productionRate > 0 ? productionRate : 1;
 
     this.staticUnits = 0;

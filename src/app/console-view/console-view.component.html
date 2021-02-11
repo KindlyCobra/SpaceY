@@ -1,5 +1,6 @@
 <div style="height: 14vh; display: inline-block; width: 98%; padding-left: 1%; padding-top: 1%">
-  <mat-table [dataSource]="consoleService.subscribeToPrompts" style="height: 13vh; width: 100%; overflow: auto">
+  <mat-table #scrollMe [scrollTop]="scrollMe.scrollHeight" [dataSource]="consoleService.subscribeToPrompts"
+    style="height: 13vh; width: 100%; overflow: auto">
     <ng-container matColumnDef="timestamp">
       <mat-cell *matCellDef="let row">
         {{row.timestamp | date : 'mediumTime'}}
@@ -14,5 +15,3 @@
     <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
   </mat-table>
 </div>
-
-
