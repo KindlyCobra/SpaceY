@@ -4,14 +4,14 @@
     </mat-toolbar>
 
     <mat-tab-group [selectedIndex]="tabIndex" class="padded">
-        <mat-tab label="Connect to MetaMask" style="max-width: 33%; width: 33%">
+        <mat-tab label="Connect to MetaMask">
             <start-menu-connect-metamask (connectedToMetaMask)="onConnectedToMetaMask()"></start-menu-connect-metamask>
         </mat-tab>
-        <mat-tab label="Choose an Universe" style="max-width: 33%; width: 33%">
+        <mat-tab label="Choose a Universe">
             <start-menu-choose-universe (universeSelected)="onUniverseSelected($event)">
             </start-menu-choose-universe>
         </mat-tab>
-        <mat-tab label="Buy initial planet" style="max-width: 33%; width: 33%">
+        <mat-tab label="Buy initial planet">
             <start-menu-initial-planet #initialPlanetChild (boughtInitialPlanet)="onBoughtInitialPlanet()">
             </start-menu-initial-planet>
         </mat-tab>

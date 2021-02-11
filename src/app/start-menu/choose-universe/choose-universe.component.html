@@ -21,7 +21,7 @@
     <mat-expansion-panel (opened)="onCustomUniverseSelected()">
         <mat-expansion-panel-header>
             <mat-panel-title>
-                Custom universe
+                Custom Universe
             </mat-panel-title>
             <mat-panel-description *ngIf="isCustom">
                 {{customUniverseAddress}}
@@ -35,4 +35,4 @@
 
 </mat-accordion>
 
-<button matButton (click)="onSelectUniverseClick()" class="full-width-field">Select Universe</button>
+<button mat-flat-button color="accent" (click)="onSelectUniverseClick()" class="full-width-field" style="margin-top: 10px">Select Universe</button>

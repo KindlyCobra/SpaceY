@@ -15,9 +15,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatButton, MatButtonModule } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import {ClipboardModule} from '@angular/cdk/clipboard';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -47,7 +48,7 @@ const routes: Routes = [
     ConnectMetamaskComponent,
     InitialPlanetComponent,
     IngameComponent,
-    ConsoleViewComponent
+    ConsoleViewComponent,
   ],
   imports: [
     CommonModule,
@@ -69,7 +70,8 @@ const routes: Routes = [
     MatButtonModule,
     RouterModule.forRoot(routes),
     FormsModule,
-    ClipboardModule
+    ClipboardModule,
+    MatSnackBarModule,
   ],
   exports: [RouterModule],
   providers: [],

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { EthereumService } from '../ethereum.service';
-import { Planet } from '../planet';
-import { SelectionChange } from '@angular/cdk/collections';
+import {Component} from '@angular/core';
+import {EthereumService} from '../ethereum.service';
+import {Planet} from '../planet';
+import {SelectionChange} from '@angular/cdk/collections';
+import {ConsoleService, Event} from '../console.service';
 
 @Component({
   selector: 'app-move-unit-view',
@@ -14,9 +15,9 @@ export class MoveUnitViewComponent {
   selectedTo?: Planet;
   somethingSelectedTo: boolean;
 
-  isMove: boolean = true;
+  isMove = true;
 
-  constructor(private ethereumService: EthereumService) {}
+  constructor(private ethereumService: EthereumService, private consoleService: ConsoleService) {}
 
   onSelectionChanged(where: 'left' | 'right', selection: SelectionChange<Planet>): void {
     if (where === 'left') {
@@ -40,18 +41,23 @@ export class MoveUnitViewComponent {
     const from = this.selectedFrom.filter(planet => planet.owner === this.ethereumService.getPlayerAddress());
 
     if (!from || from.length === 0) {
-      console.log('Select Planet to move from from the left side!');
+      this.consoleService.addEntry('Select source planet(s) from the left side!', Event.Error);
       return;
     }
 
     if (typeof this.selectedTo === undefined) {
-      console.log('Select Planet to move to from right side!');
+      this.consoleService.addEntry('Select target planet from right side!', Event.Error);
       return;
     }
 
     if (this.selectedTo.owner !== EthereumService.NULL_ADDRESS && this.selectedTo.owner !== this.ethereumService.getPlayerAddress()) {
-      console.error('SelectedTo has either to be a empty or own planet');
-      return
+      this.consoleService.addEntry('Target planet has to be owned by none or yourself!', Event.Error);
+      return;
+    }
+
+    if (this.selectedTo.isOrigin) {
+      this.consoleService.addEntry('Cannot move units on to origin!', Event.Error);
+      return;
     }
 
     const contract = this.ethereumService.getContract();
@@ -60,7 +66,7 @@ export class MoveUnitViewComponent {
 
     if (this.isMove) {
       for (const planet of from) {
-        console.info(`Moving ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${toPlanet.renderPlanetId()}`);
+        this.consoleService.addEntry(`Moving ${planet.getTotalUnits()} units from ${planet.renderPlanetId()} to ${toPlanet.renderPlanetId()}`);
         contract.moveUnits(planet.id, toPlanet.id, planet.getTotalUnits());
       }
     } else {
@@ -68,11 +74,13 @@ export class MoveUnitViewComponent {
       const fromUnitAmounts = from.map(planet => planet.getTotalUnits());
       const fromPlanetIds = from.map(planet => planet.id);
       if (totalUnits < toPlanet.unitCost) {
-        console.error(`The total selected amount ${totalUnits} is less then the costs ${toPlanet.unitCost}`);
+        this.consoleService.addEntry(`The total selected amount ${totalUnits} is less than the costs ${toPlanet.unitCost}`, Event.Error);
         return;
       }
-      console.info(`Conquering ${toPlanet.renderPlanetId()} from [${fromPlanetIds}] with [${fromUnitAmounts}] => ${totalUnits} units`);
-      await contract.conquerPlanet(fromPlanetIds, toPlanet.id, fromUnitAmounts);
+      this.consoleService.addEntry(`Conquering ${toPlanet.renderPlanetId()} from [${fromPlanetIds}] with [${fromUnitAmounts}] => ${totalUnits} units`, Event.Success);
+
+      await contract.conquerPlanet(fromPlanetIds, toPlanet.id, fromUnitAmounts)
+        .catch(() => this.consoleService.addEntry(`Error while trying to conquer.`, Event.Error));
     }
   }
 }

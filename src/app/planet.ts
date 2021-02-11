@@ -13,9 +13,11 @@ export class Planet {
 
     this.staticUnits = 0;
     this.dynamicUnits = 0;
+    this.isOrigin = planetId === universeSize;
   }
 
   readonly id: number;
+  readonly isOrigin: boolean;
   unitCost: number;
   unitProductionRate: number;
 
